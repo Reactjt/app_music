@@ -4,6 +4,8 @@ import { Icon } from "@iconify/react";
 import songContext from "../contexts/songContext";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
+import SongFilter from "../components/InstrumentFilter";
+import Sidebar from "../components/Sidebar";
 
 const LoggedInContainer = ({info, children}) => {
 
@@ -29,7 +31,7 @@ const LoggedInContainer = ({info, children}) => {
       setSearchResults(filteredResults);
     };
     
-    console.log({info})
+    // console.log({info})
     const {
         currentSong,
         setCurrentSong,
@@ -39,7 +41,7 @@ const LoggedInContainer = ({info, children}) => {
         setIsPaused,
     } = useContext(songContext);
 
-    console.log({info})
+    
 
 
 
@@ -94,7 +96,7 @@ const LoggedInContainer = ({info, children}) => {
         }
     };
     
-      console.log({currentSong});
+    //   console.log({currentSong});
 
        
 
@@ -174,9 +176,10 @@ const LoggedInContainer = ({info, children}) => {
 // bg-gray-900 bg-opacity-75
     // console.log({currentSong});
 
-    
+   
+ 
     return (
-        <div className="h-full w-full bg-gray-900  ">
+        <div className="h-full w-full bg-zinc-900  ">
               <Navbar onLogoClick={handleLogoClick} /> {/* Pass onLogoClick prop */}  
                        {/* Add the SearchBar component */}
                       
@@ -195,21 +198,24 @@ const LoggedInContainer = ({info, children}) => {
     
     <div className="flex-grow overflow-hidden">
             <div className="h-9/10 w-full flex ">
-                {/* This first div will be the left panel */}
-                <div className="h-full w-1/5 bg-gray-900 bg-opacity-75 text-white  flex flex-col justify-between pb-10">
 
-                </div>
+
+                {/* This first div will be the left panel */}
+              
+              <Sidebar info={info}/>
+ 
+
                 {/* This second div will be the right part(main content) */}
-                <div className="h-full w-4/5  bg-gray-900 bg-opacity-75 text-white  overflow-auto">
+                <div className="sm:h-full w-4/5  bg-zinc-900 text-white  overflow-auto sm:ml-auto">
                   
-                    <div className="content p-4 pt-0 max-h-96 overflow-auto">
+                    <div className="content p-4 pt-0  overflow-auto" style={{ maxHeight: "33rem" }}>
                         {children}
                     </div>
                 </div>
             </div>
             {/* This div is the current playing song */}
             {currentSong && (
-                <div className="w-full h-1/10 bg-gray-900 bg-opacity-75  text-white flex items-center px-4 ">
+                <div className="w-full h-1/10  bg-zinc-900  text-white flex items-center px-4 ">
                     <div className="w-1/4 flex items-center">
                         <img
                               src= {currentSong.thumb}
@@ -220,8 +226,9 @@ const LoggedInContainer = ({info, children}) => {
                             <div className="text-sm hover:underline cursor-pointer text-white">
                                  {currentSong.name}
                             </div>
+                          
                             <div className="text-xs text-gray-500 hover:underline cursor-pointer">
-                                 
+                                 {currentSong.artis_name}
                             </div>
                         </div>
                     </div>
@@ -265,3 +272,11 @@ const LoggedInContainer = ({info, children}) => {
 };
 
 export default LoggedInContainer;
+
+
+
+
+
+{/* <div className="h-full w-1/5  bg-zinc-900 text-white  flex flex-col justify-between pb-10">
+<SongFilter info={info} />
+</div> */}

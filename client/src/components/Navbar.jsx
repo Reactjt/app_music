@@ -13,7 +13,7 @@ export default function Navbar({onLogoClick}) {
   
 
   return (
-    <nav className="  bg-gray-900 bg-opacity-75">
+    <nav className="  bg-zinc-800   shadow-md ">
       <div className="container mx-auto px-4 py-2 md:flex md:justify-between md:items-center">
         <div className="flex items-center justify-between">
           <a href="#" className="flex text-lg font-semibold text-white mx-10">
@@ -54,10 +54,10 @@ export default function Navbar({onLogoClick}) {
         </div>
         <div
           className={`md:flex md:items-center ${
-            isMenuOpen ? "block bg-black bg-opacity-30" : "hidden"
+            isMenuOpen ? "block  bg-zinc-800 " : "hidden"
           }`}
         >
-          <ul className="md:flex justify-center md:space-x-8 md:mt-0 mt-4">
+          <ul className="md:flex justify-center md:space-x-8 md:mt-0 mt-4 ">
             <li>
               <a
                 href="#"

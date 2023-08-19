@@ -68,7 +68,7 @@ const SingleSongCard = ({ info }) => {
  
                     }}
                 >
-                    <div className="hover:bg-gray-400 hover:bg-opacity-20 p-4 flex items-center">
+                    <div className="hover:bg-gray-400 hover:bg-opacity-20 p-4 flex items-center  border-b-gray-200 border-b border-opacity-10">
                         <div>
                             <img
                                 src={item.thumb}

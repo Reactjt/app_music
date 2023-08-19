@@ -49,14 +49,14 @@ const SearchBar = ({ records, onSearch }) => {
     <div ref={searchRef} className="relative w-1/3 flex items-center drop-shadow-xl">
   <input
     type="text"
-    className="px-4 py-2 w-full bg-gray-800 border border-gray-300 text-white rounded-xl focus:outline-none focus:border-blue-500"
+    className="px-6 py-3 w-full  bg-zinc-800 border border-zinc-900 text-white rounded-xl focus:outline-none focus:border-blue-500"
     placeholder="Enter Keywords"
     value={query}
     onChange={handleInputChange}
     onKeyDown={handleKeyDown}
   />
   {suggestions.length > 0 && (
-    <div className={`w-full max-h-80 p-4 overflow-auto absolute top-10 left-0 right-0 z-10 bg-gray-900 text-white border border-gray-300 rounded-md shadow-md transition-transform ${suggestions.length > 0 && query.trim() !== '' ? 'transform scale-100 opacity-100' : 'transform scale-95 opacity-0 pointer-events-none'}`}>
+    <div className={`w-full max-h-80 p-4 overflow-auto absolute top-10 left-0 right-0 z-10  bg-zinc-900 text-white border border-gray-300 rounded-md shadow-md transition-transform ${suggestions.length > 0 && query.trim() !== '' ? 'transform scale-100 opacity-100' : 'transform scale-95 opacity-0 pointer-events-none'}`}>
       <ul>
         {suggestions.map((suggestion) => (
           <li
