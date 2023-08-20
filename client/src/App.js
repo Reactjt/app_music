@@ -35,9 +35,9 @@ function App() {
                                      }}
                                      >
                         <Routes>  
-                            <Route path="/" element={<MyMusic />} />
+                             
 
-                            <Route path="/filter" element={<FilteredSongs />} />
+                            <Route path="/" element={<FilteredSongs />} />
                         </Routes>
                         </filteredInfoContext.Provider>
  

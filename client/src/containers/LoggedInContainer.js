@@ -4,7 +4,6 @@ import { Icon } from "@iconify/react";
 import songContext from "../contexts/songContext";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
-import SongFilter from "../components/InstrumentFilter";
 import Sidebar from "../components/Sidebar";
 
 const LoggedInContainer = ({info, children}) => {
@@ -208,7 +207,7 @@ const LoggedInContainer = ({info, children}) => {
                 {/* This second div will be the right part(main content) */}
                 <div className="sm:h-full w-4/5  bg-zinc-900 text-white  overflow-auto sm:ml-auto">
                   
-                    <div className="content p-4 pt-0  overflow-auto" style={{ maxHeight: "33rem" }}>
+                    <div className="content p-4 pt-0  overflow-auto" style={{ maxHeight: "33rem", minHeight: "33rem" }}>
                         {children}
                     </div>
                 </div>
