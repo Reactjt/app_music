@@ -202,7 +202,7 @@ const LoggedInContainer = ({info, children}) => {
 
                 {/* This first div will be the left panel */}
               
-              <Sidebar info={info}/>
+              <Sidebar info={info} />
  
 
                 {/* This second div will be the right part(main content) */}

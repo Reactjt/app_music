@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
 const SongFilter = ({ info }) => {
-  const [selectedFilter, setSelectedFilter] = useState('');
+  const [ selectedFilter, setSelectedFilter] = useState('');
 
  const songs = info.records;
  console.log(songs)
