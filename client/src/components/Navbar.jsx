@@ -28,7 +28,7 @@ export default function Navbar({onLogoClick}) {
          
           <button
             onClick={toggleMenu}
-            className=" md:hidden text-white focus:outline-none "
+            className=" md:hidden   text-white focus:outline-none "
             aria-label="Toggle menu"
           >
             <svg

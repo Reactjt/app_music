@@ -2,6 +2,9 @@ import { useContext, useState } from "react";
 import songContext from "../../contexts/songContext";
 import { Howl } from "howler";
 import filteredInfoContext from "../../contexts/FilteredinfoContext";
+import { play } from "../../assets";
+import {Icon} from "@iconify/react"
+
 
 const SingleFilterCard = ({ info}) => {
  
@@ -91,16 +94,23 @@ const SingleFilterCard = ({ info}) => {
                             <img
                                 src={item.thumb}
                                 alt=""
-                                className="w-12 h-12 object-cover"
+                                className="w-14 h-14 object-cover mx-3 sm:mx-3"
                             />
+                        </div>
+                        <div className="px-6 sm:px-5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="white" d="M21.409 9.353a2.998 2.998 0 0 1 0 5.294L8.597 21.614C6.534 22.736 4 21.276 4 18.968V5.033c0-2.31 2.534-3.769 4.597-2.648l12.812 6.968Z"/></svg>
+                        </div>
+                        <div>
+                        
                         </div>
                          
                         <div className="w-full">
-                            <div className="text-white flex justify-center flex-col pl-4 w-5/6">
+                            <div className="text-white flex justify-center flex-col sm:pl-4 w-5/6">
                                 <div className="cursor-pointer hover:underline">
                                     
                                     {item.name}
                                 </div>
+                              
                                 <div className="text-xs text-gray-400 cursor-pointer hover:underline">
                                 {item.artis_name}
                                 </div>
