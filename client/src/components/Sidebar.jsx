@@ -1,13 +1,16 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { Link } from 'react-router-dom';
+import filteredInfoContext from '../contexts/FilteredinfoContext';
 
 const Sidebar = ({info}) => {
+  
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const [selectedFilter, setSelectedFilter] = useState('');
+ 
 
   const songs = info.records;
   console.log(songs)
@@ -19,11 +22,6 @@ const Sidebar = ({info}) => {
      // Add more keywords here
    ];
  
-   // Filter songs based on the selected keyword
-   const filteredinfo = selectedFilter
-     ? songs.filter(song => song.flt_name.includes(selectedFilter))
-     : songs;
-  console.log(filteredinfo)
 
 
 
@@ -83,25 +81,30 @@ const Sidebar = ({info}) => {
                   {/* ...path data... */}
                 </svg>
               </button>
-              <ul
-                id="dropdown-example"
-                className={`${
-                  isSidebarOpen ? '' : 'hidden'
-                } py-2 space-y-2 pl-10`}
-              >
+              <filteredInfoContext.Consumer>
+        {({ selectedFilter, setSelectedFilter }) => (
+          <ul
+            id="dropdown-example"
+            className={`${
+              isSidebarOpen ? '' : 'hidden'
+            } py-2 space-y-2 pl-10`}
+          >
             {filterKeywords.map(keyword => (
-        <li
-          key={keyword}
-          onClick={() => setSelectedFilter(keyword)}
-          className={`px-3 py-2 m-2   bg-zinc-900 hover:cursor-pointer overflow-y-auto ${
-            selectedFilter === keyword ? 'bg-zinc-800 text-gray-400' : 'bg-zinc-900 text-gray-200'
-          }`}
-        >
-          {keyword}
-        </li>
-      ))}
-                
-              </ul>
+              <li
+                key={keyword}
+                onClick={() => setSelectedFilter(keyword)}
+                className={`px-3 py-2 m-2   bg-zinc-900 hover:cursor-pointer overflow-y-auto ${
+                  selectedFilter === keyword ? 'bg-zinc-800 text-gray-400' : 'bg-zinc-900 text-gray-200'
+                }`}
+              >
+                <Link to="/filter">
+                  {keyword}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </filteredInfoContext.Consumer>
             </li>
           </ul>
         </div>
