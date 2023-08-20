@@ -28,20 +28,29 @@ const Sidebar = ({info}) => {
   return (
     <div className="relative">
       <button
-        onClick={toggleSidebar}
-        type="button"
-        className=" bg-white inline-flex items-center p-2 mt-2 ml-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-white-700 dark:focus:ring-gray-600"
-      >
-        <span className="sr-only">Open sidebar</span>
-        <svg
-          className="w-6 h-6"
-          aria-hidden="true"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          {/* ...path data... */}
-        </svg>
+            onClick={toggleSidebar}
+            className=" md:hidden  text-white focus:outline-none pl-8"
+            aria-label="Toggle menu"
+          >
+            <svg
+              className="w-6 h-6 fill-current"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+               (
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M4 5.6H20V7.6H4V5.6ZM4 11.6H20V13.6H4V11.6ZM4 17.6H20V19.6H4V17.6Z"
+                />
+              ) : (
+                <path
+                  fillRule="evenodd"
+                  clipRule="evenodd"
+                  d="M4 5H20V7H4V5ZM4 11H20V13H4V11ZM4 17H20V19H4V17Z"
+                />
+              )
+            </svg>
       </button>
 
       <aside
@@ -55,7 +64,7 @@ const Sidebar = ({info}) => {
             <li>
               <button
                 type="button"
-                className="flex items-center w-full p-2 text-base text-gray-900 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                className="flex items-center w-full p-2 text-base  text-zinc-800 transition duration-75 rounded-lg group hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                 aria-controls="dropdown-example"
                 onClick={toggleSidebar}
               >

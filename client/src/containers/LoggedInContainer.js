@@ -172,6 +172,13 @@ const LoggedInContainer = ({info, children}) => {
         
     };
 
+    // document.addEventListener("keypress", (event) => {
+    //     if(event.keycode === 32 || event.key === " "){
+    //         event.preventDefault();
+    //         togglePlayPause();
+    //     }
+    // })
+
 // bg-gray-900 bg-opacity-75
     // console.log({currentSong});
 
@@ -207,60 +214,62 @@ const LoggedInContainer = ({info, children}) => {
                 {/* This second div will be the right part(main content) */}
                 <div className="sm:h-full w-4/5  bg-zinc-900 text-white  overflow-auto sm:ml-auto">
                   
-                    <div className="content p-4 pt-0  overflow-auto" style={{ maxHeight: "33rem", minHeight: "33rem" }}>
+                    <div className="content p-4 pt-0  overflow-auto" style={{ maxHeight: "32rem", minHeight: "32rem" }}>
                         {children}
                     </div>
                 </div>
             </div>
             {/* This div is the current playing song */}
             {currentSong && (
-                <div className="w-full h-1/10  bg-zinc-900  text-white flex items-center px-4 ">
-                    <div className="w-1/4 flex items-center">
+                <div className="w-full h-1/10 py-8 sm:py-5  bg-zinc-900  text-white flex items-center px-4 ">
+                
+                    <div className="w-1/2 flex items-center">
                         <img
                               src= {currentSong.thumb}
                             alt="currentSongThumbail"
-                            className="h-14 w-14 rounded"
+                            className="h-16 w-16 sm:h-20 sm:w-20 mr-6 sm:mx-10 rounded"  
                         />
-                        <div className="pl-4">
-                            <div className="text-sm hover:underline cursor-pointer text-white">
-                                 {currentSong.name}
-                            </div>
-                          
-                            <div className="text-xs text-gray-500 hover:underline cursor-pointer">
-                                 {currentSong.artis_name}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="w-1/2 flex justify-center h-full flex-col items-center">
-                        <div className="flex w-1/3 justify-between items-center">
+                           <div className="w-1/2 flex justify-center h-full flex-col items-left sm:mx-10">
+                        <div className="flex items-center">
                             {/* controls for the playing song go here */}
                            
                             <Icon
                                 icon="mdi:skip-previous-outline"
                                 fontSize={30}
-                                className="cursor-pointer text-gray-500 hover:text-white"
+                                className="cursor-pointer   text-white mx-2 sm:mx-4"
                                 onClick={playPreviousSong}
                             />
                             <Icon
                                 icon={
                                     isPaused
-                                        ? "ic:baseline-play-circle"
-                                        : "ic:baseline-pause-circle"
+                                        ? "solar:play-bold"
+                                        : "solar:pause-bold"
                                 }
-                                fontSize={50}
-                                className="cursor-pointer text-gray-500 hover:text-white"
+                                className="cursor-pointer w-6 h-6 text-white"
                                 onClick={togglePlayPause}
                             />
+                           
                             <Icon
                                 icon="mdi:skip-next-outline"
                                 fontSize={30}
-                                className="cursor-pointer text-gray-500 hover:text-white"
+                                className="cursor-pointer   text-white mx-2 sm:mx-4"
                                 onClick={playNextSong}
                             />
                            
                         </div>
                         {/* <div>Progress Bar Here</div> */}
                     </div>
+                        <div className=" ">
+                            <div className="hidden sm:block text-sm  cursor-pointer text-white">
+                                 {currentSong.name}
+                            </div>
+                          
+                            <div className="hidden sm:block text-xs text-gray-500   cursor-pointer">
+                                 {currentSong.artis_name}
+                            </div>
+                        </div>
+                    </div>
+                 
                   
                 </div>
             )}
