@@ -212,9 +212,9 @@ const LoggedInContainer = ({info, children}) => {
  
 
                 {/* This second div will be the right part(main content) */}
-                <div className="sm:h-full w-4/5  bg-zinc-900 text-white  overflow-auto sm:ml-auto">
+                <div className=" sm:h-full sm:w-4/5  bg-zinc-900 text-white  overflow-auto sm:ml-auto">
                   
-                    <div className="content p-4 pt-0  overflow-auto" style={{ maxHeight: "32rem", minHeight: "32rem" }}>
+                    <div className="content sm:p-4 pt-0  overflow-auto max-h-33 min-h-33 sm:max-h-33 sm:min-h-33" >
                         {children}
                     </div>
                 </div>
@@ -268,11 +268,16 @@ const LoggedInContainer = ({info, children}) => {
                                  {currentSong.artis_name}
                             </div>
                         </div>
+                      
                     </div>
-                 
-                  
+                    <div className="flex">
+                    <Icon icon="ri:download-line" color="white" className="mx-2 sm:mx-4 sm:h-5 sm:w-5   hover:cursor-pointer"/>
+                        <Icon icon="ph:star-fill" color="white" className="mx-2 sm:mx-4 sm:h-5 sm:w-5 hover:cursor-pointer"/>
+                        </div>
                 </div>
+                
             )}
+            
          </div>
        
         </div>
@@ -285,6 +290,4 @@ export default LoggedInContainer;
 
 
 
-{/* <div className="h-full w-1/5  bg-zinc-900 text-white  flex flex-col justify-between pb-10">
-<SongFilter info={info} />
-</div> */}
+ 

@@ -1,10 +1,12 @@
 import "./output.css";
 import {useState} from "react";
 import {BrowserRouter, Routes, Route, Navigate} from "react-router-dom";
-import MyMusic from "./routes/MyMusic";
+ 
 import songContext from "./contexts/songContext";
 import filteredInfoContext from "./contexts/FilteredinfoContext";
 import FilteredSongs from "./routes/FilteredSongs";
+  
+import { SidebarProvider } from "./contexts/Sidebarcontext";
  
 
 function App() {
@@ -34,11 +36,13 @@ function App() {
                                     setSelectedFilter
                                      }}
                                      >
+                                      <SidebarProvider>
                         <Routes>  
                              
 
                             <Route path="/" element={<FilteredSongs />} />
                         </Routes>
+                        </SidebarProvider>
                         </filteredInfoContext.Provider>
  
                     </songContext.Provider>
