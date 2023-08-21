@@ -1,14 +1,15 @@
 import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import filteredInfoContext from '../contexts/FilteredinfoContext';
+import { useSidebarContext } from '../contexts/Sidebarcontext';
 
 const Sidebar = ({info}) => {
   
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
-  };
+  const {isSidebarOpen, setIsSidebarOpen} = useSidebarContext();
+
+
+  const {toggleSidebar} = useSidebarContext();
 
  
 
@@ -27,34 +28,9 @@ const Sidebar = ({info}) => {
 
   return (
     <div className="relative">
-      <button
-            onClick={toggleSidebar}
-            className=" md:hidden  text-white focus:outline-none pl-8"
-            aria-label="Toggle menu"
-          >
-            <svg
-              className="w-6 h-6 fill-current"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-               (
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M4 5.6H20V7.6H4V5.6ZM4 11.6H20V13.6H4V11.6ZM4 17.6H20V19.6H4V17.6Z"
-                />
-              ) : (
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M4 5H20V7H4V5ZM4 11H20V13H4V11ZM4 17H20V19H4V17Z"
-                />
-              )
-            </svg>
-      </button>
-
+     
       <aside
-        className={`fixed left-0 w-64 h-96 transition-transform ${
+        className={`fixed sm:left-0 w-64 h-96 transition-transform ${
           isSidebarOpen ? '' : '-translate-x-full'
         } sm:translate-x-0`}
         aria-label="Sidebar"

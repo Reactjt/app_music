@@ -13,6 +13,22 @@ module.exports = {
       backgroundColor: {
           "app-black": "#121212",
       },
+      maxHeight: {
+        '30': '30rem',
+        '31': '31rem',
+        '32': '32rem',
+        '33' : '33rem',
+        '34': '34rem',
+        '35': '35rem'     
+      },
+      minHeight: {
+        '30': '30rem',
+        '31': '31rem',
+        '32': '32rem',
+        '33' : '33rem',
+        '34': '34rem',
+        '35': '35rem'
+      },
   },
   },
   plugins: [],
