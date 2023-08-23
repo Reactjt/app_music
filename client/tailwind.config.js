@@ -7,8 +7,8 @@ module.exports = {
           poppins: ["Poppins", "sans-serif"],
       },
       height: {
-          "1/10": "10%",
-          "9/10": "90%",
+          "1/10": "6%",
+          "9/10": "94%",
       },
       backgroundColor: {
           "app-black": "#121212",
@@ -19,7 +19,13 @@ module.exports = {
         '32': '32rem',
         '33' : '33rem',
         '34': '34rem',
-        '35': '35rem'     
+        '35': '35rem', 
+        '45': '45rem',  
+        '46': '46rem',
+        '47': '47rem', 
+        '48': '48rem',
+        '49': '49rem',
+        '50': '50rem'
       },
       minHeight: {
         '30': '30rem',
@@ -27,7 +33,13 @@ module.exports = {
         '32': '32rem',
         '33' : '33rem',
         '34': '34rem',
-        '35': '35rem'
+        '35': '35rem', 
+        '45': '45rem',  
+        '46': '46rem',
+        '47': '47rem', 
+        '48': '48rem',
+        '49': '49rem',
+        '50': '50rem'
       },
   },
   },

@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import { Link } from 'react-router-dom';
 import filteredInfoContext from '../contexts/FilteredinfoContext';
 import { useSidebarContext } from '../contexts/Sidebarcontext';
+import { Icon } from '@iconify/react';
 
 const Sidebar = ({info}) => {
   
@@ -11,7 +12,7 @@ const Sidebar = ({info}) => {
 
   const {toggleSidebar} = useSidebarContext();
 
- 
+  const { selectedFilter, setSelectedFilter } = useContext(filteredInfoContext);
 
   const songs = info.records;
   console.log(songs)
@@ -22,6 +23,18 @@ const Sidebar = ({info}) => {
        "rhythmic", "exotic", "cuban rhythm", "cultural", "unique","Fun","85 bpm"
      // Add more keywords here
    ];
+
+   const handleFilterToggle = (keyword) => {
+    if (selectedFilter === keyword) {
+      setSelectedFilter(null); // Remove the filter
+    } else {
+      setSelectedFilter(keyword); // Set the filter
+    }
+  };
+
+  const handleClearFilters = () => {
+    setSelectedFilter(null); // Clear all filters
+  };
  
 
 
@@ -32,7 +45,7 @@ const Sidebar = ({info}) => {
       <aside
         className={`fixed sm:left-0 w-64 h-96 transition-transform ${
           isSidebarOpen ? '' : '-translate-x-full'
-        } sm:translate-x-0`}
+        } sm:translate-x-0 ${isSidebarOpen ? '' : 'hidden md:block'}`}
         aria-label="Sidebar"
       >
         <div className="h-full px-3 py-4 overflow-y-auto bg-gray-50 dark:bg-zinc-900">
@@ -72,21 +85,33 @@ const Sidebar = ({info}) => {
             id="dropdown-example"
             className={`${
               isSidebarOpen ? '' : 'hidden'
-            } py-2 space-y-2 pl-10`}
+            } py-2 space-y-2 pl-10 overflow-y-auto`}
           >
-            {filterKeywords.map(keyword => (
-              <li
-                key={keyword}
-                onClick={() => setSelectedFilter(keyword)}
-                className={`px-3 py-2 m-2   bg-zinc-900 hover:cursor-pointer overflow-y-auto ${
-                  selectedFilter === keyword ? 'bg-zinc-800 text-gray-400' : 'bg-zinc-900 text-gray-200'
-                }`}
-              >
-                <Link to="/">
-                  {keyword}
-                </Link>
-              </li>
-            ))}
+         {filterKeywords.map((keyword) => (
+                  <li
+                    key={keyword}
+                    className={`px-3 py-2 m-2 bg-zinc-900 hover:cursor-pointer overflow-y-auto ${
+                      selectedFilter === keyword
+                        ? 'bg-zinc-800 text-gray-400'
+                        : 'bg-zinc-900 text-gray-200'
+                    }`}
+                  >
+                    <Link to="/">
+                      <button
+                        onClick={() => handleFilterToggle(keyword)}
+                        className="flex items-center"
+                      >
+                        {selectedFilter === keyword ? (
+                          <span className="mr-2 rounded-full hover:bg-yellow-500"><Icon icon="ic:round-minus" color="white" width="40" height="40" /></span>
+                        ) : (
+                          <span className="mr-2 rounded-full hover:bg-yellow-500"><Icon icon="ic:round-plus" color="white" width="40" height="40" /></span>
+                        )}
+                        {keyword}
+                      </button>
+                    </Link>
+                  </li>
+                ))}
+                
           </ul>
         )}
       </filteredInfoContext.Consumer>

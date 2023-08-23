@@ -21,7 +21,7 @@ export default function Navbar({onLogoClick}) {
             <img
             src={logo}
             alt="Logo"
-            className="w-8 h-8 rounded-full cursor-pointer hover:bg-gray-400 hover:bg-opacity-20"
+            className="w-8 h-8 rounded-full cursor-pointer transition duration-100 hover:bg-gray-400 hover:bg-opacity-20"
             onClick={onLogoClick}
           />
           </a>
