@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { Howl } from "howler";
 import { Icon } from "@iconify/react";
 import songContext from "../contexts/songContext";
@@ -9,9 +9,12 @@ import Sidebar from "../components/Sidebar";
 const LoggedInContainer = ({info, children}) => {
 
     const [showSearch, setShowSearch] = useState(false); // State to control search bar visibility
+    const [volume, setVolume] = useState(100);
 
+    const [isExpanded, setIsExpanded] = useState(false);
     const handleLogoClick = () => {
       setShowSearch(!showSearch); // Toggle search bar visibility on logo click
+      setIsExpanded(!isExpanded);
     };
 
     const [searchResults, setSearchResults] = useState([]); // Store search results
@@ -181,11 +184,35 @@ const LoggedInContainer = ({info, children}) => {
 
 // bg-gray-900 bg-opacity-75
     // console.log({currentSong});
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const audioRef = useRef(null);
+  
+    const handleTimeUpdate = () => {
+        if (audioRef.current && isFinite(audioRef.current.duration)) {
+          setCurrentTime(audioRef.current.currentTime);
+        }
+      };
+   
+    const formatTime = (timeInSeconds) => {
+      const minutes = Math.floor(timeInSeconds / 60);
+      const seconds = Math.floor(timeInSeconds % 60);
+      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    };
 
+    const handleSeek = (e) => {
+        if (audioRef.current && isFinite(audioRef.current.duration)) {
+          const seekTime = (e.nativeEvent.offsetX / e.target.clientWidth) * audioRef.current.duration;
+          audioRef.current.currentTime = seekTime;
+        }
+      };
    
  
     return (
         <div className="h-full w-full bg-zinc-900  ">
+        
+
               <Navbar onLogoClick={handleLogoClick} /> {/* Pass onLogoClick prop */}  
                        {/* Add the SearchBar component */}
                       
@@ -212,18 +239,18 @@ const LoggedInContainer = ({info, children}) => {
  
 
                 {/* This second div will be the right part(main content) */}
-                <div className=" sm:h-full sm:w-4/5  bg-zinc-900 text-white  overflow-auto sm:ml-auto">
+                <div className=" sm:h-full md:w-4/5  bg-zinc-900 text-white  overflow-auto md:ml-auto">
                   
-                    <div className="content sm:p-4 pt-0  overflow-auto max-h-33 min-h-33 sm:max-h-33 sm:min-h-33" >
+                    <div className={`content md:p-4 pt-0  overflow-auto ${isExpanded ? 'max-h-50 min-h-50   lg:max-h-50 lg:min-h-50' : 'max-h-50 min-h-50 lg:max-h-50 lg:min-h-50'} `}>
                         {children}
                     </div>
                 </div>
             </div>
             {/* This div is the current playing song */}
             {currentSong && (
-                <div className="w-full h-1/10 py-8 sm:py-5  bg-zinc-900  text-white flex items-center px-4 ">
+                <div className="w-full h-1/10 py-8 sm:py-5  bg-zinc-900  text-white flex items-center px-4 fixed bottom-0">
                 
-                    <div className="w-1/2 flex items-center">
+                    <div className="w-full flex items-center">
                         <img
                               src= {currentSong.thumb}
                             alt="currentSongThumbail"
@@ -257,28 +284,59 @@ const LoggedInContainer = ({info, children}) => {
                             />
                            
                         </div>
-                        {/* <div>Progress Bar Here</div> */}
+     
+       
                     </div>
-                        <div className=" ">
-                            <div className="hidden sm:block text-sm  cursor-pointer text-white">
+
+                     {/* Progress bar */}
+  
+                        <div className="w-1/2">
+                            <div className="hidden md:block text-sm  cursor-pointer text-white">
                                  {currentSong.name}
                             </div>
                           
-                            <div className="hidden sm:block text-xs text-gray-500   cursor-pointer">
+                            <div className="hidden md:block text-xs text-gray-500   cursor-pointer">
                                  {currentSong.artis_name}
                             </div>
                         </div>
+                                      
+   
+    
+
+
                       
                     </div>
                     <div className="flex">
-                    <Icon icon="ri:download-line" color="white" className="mx-2 sm:mx-4 sm:h-5 sm:w-5   hover:cursor-pointer"/>
-                        <Icon icon="ph:star-fill" color="white" className="mx-2 sm:mx-4 sm:h-5 sm:w-5 hover:cursor-pointer"/>
+                    <Icon icon="ri:download-line" color="white" className="hidden md:block mx-2 sm:mx-4 sm:h-5 sm:w-5   hover:cursor-pointer"/>
+                        <Icon icon="ph:star-fill" color="white" className="hidden md:block mx-2 sm:mx-4 sm:h-5 sm:w-5 hover:cursor-pointer"/>
                         </div>
+
+                            {/* Volume Slider */}
+<div className="hidden md:flex items-center">
+<Icon icon="subway:sound" color="white" />
+    <input
+        type="range"
+        min="0"
+        max="100"
+        step="1"
+        value={volume}
+        onChange={(e) => {
+            const newVolume = parseInt(e.target.value);
+            setVolume(newVolume);
+            if (soundPlayed) {
+                soundPlayed.volume(newVolume / 100); // Update the volume of the currently playing sound
+            }
+        }}
+        className="w-24 t"
+    />
+</div>
                 </div>
                 
             )}
             
          </div>
+          
+    
        
         </div>
     );

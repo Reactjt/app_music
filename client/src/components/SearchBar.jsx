@@ -1,8 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useSidebarContext } from '../contexts/Sidebarcontext';
 import { logo } from '../assets';
+import { Link } from 'react-router-dom';
 
 const SearchBar = ({ records, onSearch }) => {
+
+  const {isMenuOpen, setIsMenuOpen} = useState("");
+  const filterKeywords = [
+    "80-89", "Bass", "Confident", "Drums", "Guitar", "Hip-Hop", "Latin","Medium Energy",
+     "Quirky", "Strings", "Synth", "groovy" , "spanish", "weird", "topline",
+      "rhythmic", "exotic", "cuban rhythm", "cultural", "unique","Fun","85 bpm"
+    // Add more keywords here
+  ];
 
   const { toggleSidebar } = useSidebarContext();
 
@@ -50,10 +59,10 @@ const SearchBar = ({ records, onSearch }) => {
 
   return (
      
-    <div ref={searchRef} className="relative w-1/2 sm:w-1/3 flex items-center drop-shadow-xl">
+    <div ref={searchRef} className="relative    sm:w-1/2 mx-12  flex items-center drop-shadow-xl">
   <input
     type="text"
-    className="px-6 py-3 w-full  bg-zinc-800 border border-zinc-900 text-white rounded-xl focus:outline-none focus:border-blue-500"
+    className="px-6 py-3 w-full  bg-zinc-800 border border-zinc-900 text-white rounded-3xl focus:outline-none focus:border-blue-500"
     placeholder="Enter Keywords"
     value={query}
     onChange={handleInputChange}
@@ -81,12 +90,12 @@ const SearchBar = ({ records, onSearch }) => {
       <img
 src={logo}
 alt="Logo"
-className="w-8 h-8 rounded-full cursor-pointer hover:bg-gray-400 hover:bg-opacity-20"
+className="w-8 h-8 rounded-full cursor-pointer hover:bg-gray-400 hover:bg-opacity-20 md:mr-4"
 onClick={handleSearch}
 /> 
 <button
             onClick={toggleSidebar}
-            className=" md:hidden  text-white focus:outline-none  sm:pl-8"
+            className=" md:hidden  text-white focus:outline-none pr-3  md:pl-8"
             aria-label="Toggle menu"
           >
             <svg
@@ -109,7 +118,23 @@ onClick={handleSearch}
               )
             </svg>
       </button>
-       
+      {isMenuOpen && (
+    <div className="w-full max-h-80 p-4 overflow-auto absolute top-10 left-0 right-0 z-10 bg-zinc-900 text-white border border-gray-300 rounded-md shadow-md transition-transform">
+      <ul>
+        {filterKeywords.map((keyword) => (
+          <li
+            key={keyword}
+            className={`px-3 py-2 m-2 bg-zinc-900 hover:cursor-pointer overflow-y-auto`}
+            onClick={() => {
+              setQuery(keyword);
+              setIsMenuOpen(false); // Close the menu and set the selected keyword
+            }}
+          >
+            <Link to="/">{keyword}</Link>
+          </li>
+        ))}
+      </ul>
+    </div>)}
   </div>
 
 </div>

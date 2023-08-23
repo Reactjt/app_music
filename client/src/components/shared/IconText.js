@@ -28,3 +28,7 @@ const IconText = ({iconName, displayText, active, targetLink, onClick}) => {
 };
 
 export default IconText;
+
+
+// <Icon icon="ri:download-line" color="white" className="hidden md:block mx-2 sm:mx-4 sm:h-5 sm:w-5   hover:cursor-pointer"/>
+// <Icon icon="ph:star-fill" color="white" className="hidden md:block mx-2 sm:mx-4 sm:h-5 sm:w-5 hover:cursor-pointer"/>
