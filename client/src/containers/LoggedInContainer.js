@@ -5,8 +5,63 @@ import songContext from "../contexts/songContext";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import Sidebar from "../components/Sidebar";
+import ProgressBar from "../components/ProgressBar";
 
 const LoggedInContainer = ({info, children}) => {
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [currentTime, setCurrentTime] = useState(0);
+    const [currentDuration, setCurrentDuration] = useState(0);
+    const [songIndex, setSongIndex] = useState(0);
+    
+ 
+   const mySongs=[...info]
+    
+  
+    const audioRef = useRef(null);
+  
+    useEffect(() => {
+      if (audioRef.current) {
+        audioRef.current.load();
+  
+        audioRef.current.addEventListener('loadedmetadata', () => {
+          setCurrentDuration(audioRef.current.duration);
+        });
+  
+        audioRef.current.addEventListener('play', () => {
+          setIsPlaying(true);
+        });
+  
+        audioRef.current.addEventListener('pause', () => {
+          setIsPlaying(false);
+        });
+  
+        audioRef.current.addEventListener('timeupdate', () => {
+          setCurrentTime(audioRef.current.currentTime);
+        });
+      }
+    }, [songIndex]);
+  
+    const playSong = (index) => {
+      setSongIndex(index);
+      if (audioRef.current) {
+        audioRef.current.play();
+      }
+    };
+  
+    const pauseSong = () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  
+    const handleSeek = (seekTime) => {
+      if (audioRef.current) {
+        audioRef.current.currentTime = seekTime;
+        setCurrentTime(seekTime);
+      }
+    };
+
+    
 
     const [showSearch, setShowSearch] = useState(false); // State to control search bar visibility
     const [volume, setVolume] = useState(100);
@@ -18,10 +73,11 @@ const LoggedInContainer = ({info, children}) => {
     };
 
     const [searchResults, setSearchResults] = useState([]); // Store search results
-
+    console.log(mySongs)
     const handleSearch = (query) => {
       // Filter records based on query
-      const filteredResults = info.records.filter(
+      
+      const filteredResults = info.filter(
         (record) =>
           record.name.toLowerCase().includes(query.toLowerCase()) ||
           record.artis_name.toLowerCase().includes(query.toLowerCase()) ||
@@ -32,7 +88,7 @@ const LoggedInContainer = ({info, children}) => {
   
       setSearchResults(filteredResults);
     };
-    
+    console.log(mySongs)
     // console.log({info})
     const {
         currentSong,
@@ -45,16 +101,21 @@ const LoggedInContainer = ({info, children}) => {
 
     
 
-
-
-    const records = info && info.records ? info.records : [];
+    console.log(mySongs)
+    const records =mySongs;
+    console.log(mySongs)
+     
 
     const [filterName, setFilterName] = useState("");
 
     const filteredRecords = records.filter(
-        (record) =>
-            record.name.toLowerCase().includes(filterName.toLowerCase())
+        (record) =>{
+            
+           return record.name.toLowerCase().includes(filterName.toLowerCase())
+        }
     );
+
+   
 
 
 
@@ -113,19 +174,19 @@ const LoggedInContainer = ({info, children}) => {
             return;
         }
     
-        if (!info.records) {
+        if (!info) {
             console.log("Error: Missing records in info");
             return;
         }
     
-        const currentIndex = info.records.findIndex(song => song.audio === currentSong.audio);
+        const currentIndex = info.findIndex(song => song.audio === currentSong.audio);
         if (currentIndex === -1) {
             console.log("Error: Current song not found in records");
             return;
         }
     
-        const nextIndex = (currentIndex + 1) % info.records.length; // Circular next
-        const nextSong = info.records[nextIndex];
+        const nextIndex = (currentIndex + 1) % info.length; // Circular next
+        const nextSong = info[nextIndex];
 
         if (currentSong.sound) {
             currentSong.sound.pause(); // Pause the current sound
@@ -144,13 +205,13 @@ const LoggedInContainer = ({info, children}) => {
     
 
     const playPreviousSong = () => {
-        if (!currentSong || !currentSong.audio || !info || !info.records) {
+        if (!currentSong || !currentSong.audio || !info || !info) {
             return; // No current song to play previous from
         }
 
-        const currentIndex = info.records.findIndex(song => song.audio === currentSong.audio);
-        const previousIndex = (currentIndex - 1 + info.records.length) % info.records.length; // Circular previous
-        const previousSong = info.records[previousIndex];
+        const currentIndex = info.findIndex(song => song.audio === currentSong.audio);
+        const previousIndex = (currentIndex - 1 + info.length) % info.length; // Circular previous
+        const previousSong = info[previousIndex];
 
         if (currentSong.sound) {
             currentSong.sound.pause(); // Pause the current sound
@@ -184,30 +245,14 @@ const LoggedInContainer = ({info, children}) => {
 
 // bg-gray-900 bg-opacity-75
     // console.log({currentSong});
-    const [currentTime, setCurrentTime] = useState(0);
-    const [duration, setDuration] = useState(0);
-    const [isPlaying, setIsPlaying] = useState(false);
-    const audioRef = useRef(null);
   
-    const handleTimeUpdate = () => {
-        if (audioRef.current && isFinite(audioRef.current.duration)) {
-          setCurrentTime(audioRef.current.currentTime);
-        }
+    const handleDownload = (audioUrl) => {
+        // Use the "download" attribute to initiate download
+        const link = document.createElement('a');
+        link.href = audioUrl;
+        link.download = 'song.mp3';
+        link.click();
       };
-   
-    const formatTime = (timeInSeconds) => {
-      const minutes = Math.floor(timeInSeconds / 60);
-      const seconds = Math.floor(timeInSeconds % 60);
-      return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-    };
-
-    const handleSeek = (e) => {
-        if (audioRef.current && isFinite(audioRef.current.duration)) {
-          const seekTime = (e.nativeEvent.offsetX / e.target.clientWidth) * audioRef.current.duration;
-          audioRef.current.currentTime = seekTime;
-        }
-      };
-   
  
     return (
         <div className="h-full w-full bg-zinc-900  ">
@@ -218,7 +263,7 @@ const LoggedInContainer = ({info, children}) => {
                       
                        
                        <div className="py-6 flex justify-center ">
-                       {showSearch && <SearchBar records={info.records} onSearch={handleSearch}  />} 
+                       {showSearch && <SearchBar records={info} onSearch={handleSearch}  />} 
 
 {/* Render search results */}
 {searchResults.map((result) => (
@@ -232,29 +277,27 @@ const LoggedInContainer = ({info, children}) => {
     <div className="flex-grow overflow-hidden">
             <div className="h-9/10 w-full flex ">
 
-
                 {/* This first div will be the left panel */}
               
               <Sidebar info={info} />
  
-
                 {/* This second div will be the right part(main content) */}
-                <div className=" sm:h-full md:w-4/5  bg-zinc-900 text-white  overflow-auto md:ml-auto">
+                <div className=" md:h-full md:w-4/5  bg-zinc-900 text-white  overflow-auto  md:ml-auto">
                   
-                    <div className={`content md:p-4 pt-0  overflow-auto ${isExpanded ? 'max-h-50 min-h-50   lg:max-h-50 lg:min-h-50' : 'max-h-50 min-h-50 lg:max-h-50 lg:min-h-50'} `}>
+                    <div className={` md:p-4 pt-0  overflow-auto ${isExpanded ? 'max-h-50 min-h-50   lg:max-h-50 lg:min-h-50 md:max-h-35 md:min-h-35'  : 'max-h-50 min-h-50 lg:max-h-50 lg:min-h-50 md:max-h-35 md:min-h-35'} `}>
                         {children}
                     </div>
                 </div>
             </div>
             {/* This div is the current playing song */}
             {currentSong && (
-                <div className="w-full h-1/10 py-8 sm:py-5  bg-zinc-900  text-white flex items-center px-4 fixed bottom-0">
+                <div className="w-full h-1/10 py-8 sm:py-5 justify-center align-middle   bg-zinc-900  text-white flex items-center px-4 fixed bottom-0">
                 
-                    <div className="w-full flex items-center">
+                    <div className="w-full flex items-center mb-8">
                         <img
                               src= {currentSong.thumb}
                             alt="currentSongThumbail"
-                            className="h-16 w-16 sm:h-20 sm:w-20 mr-6 sm:mx-10 rounded"  
+                            className="h-16 w-16 sm:h-20 sm:w-20 mr-6 object-cover sm:mx-10 rounded"  
                         />
                            <div className="w-1/2 flex justify-center h-full flex-col items-left sm:mx-10">
                         <div className="flex items-center">
@@ -290,7 +333,7 @@ const LoggedInContainer = ({info, children}) => {
 
                      {/* Progress bar */}
   
-                        <div className="w-1/2">
+                        <div className="w-1/2 mb-1">
                             <div className="hidden md:block text-sm  cursor-pointer text-white">
                                  {currentSong.name}
                             </div>
@@ -306,13 +349,22 @@ const LoggedInContainer = ({info, children}) => {
 
                       
                     </div>
-                    <div className="flex">
-                    <Icon icon="ri:download-line" color="white" className="hidden md:block mx-2 sm:mx-4 sm:h-5 sm:w-5   hover:cursor-pointer"/>
+                    {/* <audio ref={audioRef} src={currentSong.audio}></audio>
+      <ProgressBar
+        currentTime={currentTime}
+        duration={currentDuration}
+        isPlaying={isPlaying}
+        onSeek={handleSeek}
+      /> */}
+                    <div className="flex mb-8">
+                    <Icon icon="ri:download-line" color="white" className="hidden md:block mx-2 sm:mx-4 sm:h-5 sm:w-5   hover:cursor-pointer"
+                         onClick={() => handleDownload(currentSong.audio)}
+                    />
                         <Icon icon="ph:star-fill" color="white" className="hidden md:block mx-2 sm:mx-4 sm:h-5 sm:w-5 hover:cursor-pointer"/>
                         </div>
 
                             {/* Volume Slider */}
-<div className="hidden md:flex items-center">
+<div className="hidden md:flex items-center mb-8">
 <Icon icon="subway:sound" color="white" />
     <input
         type="range"
