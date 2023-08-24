@@ -1,22 +1,27 @@
-import { useContext, useRef, useState } from "react";
+import { useContext, useRef, useState, useEffect } from "react";
+import React from "react";
 import songContext from "../../contexts/songContext";
 import { Howl } from "howler";
 import filteredInfoContext from "../../contexts/FilteredinfoContext";
 import { play } from "../../assets";
 import {Icon} from "@iconify/react"
 import MusicPlayer from "../MusicPlayer.js";
+import ProgressBar from "../ProgressBar";
+ 
 
 
 const SingleFilterCard = ({ info}) => {
+
+    const audioRef = React.useRef(null);
  
     const { selectedFilter, setSelectedFilter } = useContext(filteredInfoContext);
     const [progress, setProgress] = useState(0); // Current progress in seconds
     const [isPlaying, setIsPlaying] = useState(false); // Song playing status
     
     
-    const clickedSong = info.records.find((song) => song);
+  
 
-    const songs = info.records;
+    const songs = info;
 //   console.log(songs)
    // List of keywords for filtering
    const filterKeywords = [
@@ -26,28 +31,51 @@ const SingleFilterCard = ({ info}) => {
      // Add more keywords here
    ];
 
-   const audioRef = useRef(null);
- 
    const [currentTime, setCurrentTime] = useState(0);
-   const [duration, setDuration] = useState(0);
+   const [currentDuration, setCurrentDuration] = useState(0);
  
- 
- 
-   const handleSeek = (e) => {
-     const seekTime = e.target.value;
-     audioRef.current.currentTime = seekTime;
-     setCurrentTime(seekTime);
-   };
- 
-   const updateTime = () => {
-     setCurrentTime(audioRef.current.currentTime);
-   };
- 
-   const updateDuration = () => {
-     setDuration(audioRef.current.duration);
-   };
- 
+  
 
+   useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.load();
+
+      audioRef.current.addEventListener('loadedmetadata', () => {
+        setCurrentDuration(audioRef.current.duration);
+      });
+
+      audioRef.current.addEventListener('play', () => {
+        setIsPlaying(true);
+      });
+
+      audioRef.current.addEventListener('pause', () => {
+        setIsPlaying(false);
+      });
+
+      audioRef.current.addEventListener('timeupdate', () => {
+        setCurrentTime(audioRef.current.currentTime);
+      });
+    }
+  }, []);
+ 
+  const handleSeek = (seekTime) => {
+    if (audioRef.current) {
+      audioRef.current.currentTime = seekTime;
+      setCurrentTime(seekTime);
+    }
+  };
+
+  useEffect(() => {
+    // Load the audio when the component mounts
+    if (audioRef.current) {
+      audioRef.current.load();
+
+      // Listen for loadedmetadata to get the song duration
+      audioRef.current.addEventListener('loadedmetadata', () => {
+        setCurrentDuration(audioRef.current.duration);
+      });
+    }
+  }, []);
 
 
 
@@ -61,13 +89,13 @@ const SingleFilterCard = ({ info}) => {
     const { currentSong, setCurrentSong } = useContext(songContext);
 
     // Ensure that info and info.records are defined before accessing them
-    if (!info || !info.records || !Array.isArray(info.records)) {
+    if (!info  || !Array.isArray(info)) {
         return null; // Return null or a fallback UI element if necessary
     }
 
     const playSong = (audioUrl) => {
         // Find the clicked song from the records array
-        const clickedSong = info.records.find((song) => song.audio === audioUrl);
+        const clickedSong = info.find((song) => song.audio === audioUrl);
     
         if (!clickedSong) {
             return; // Return early if the clicked song is not found
@@ -138,7 +166,7 @@ const SingleFilterCard = ({ info}) => {
         link.click();
       };
 
-      console.log(info.records[0].audio)
+      console.log(info.audio)
 
       const handleShare = async () => {
         if (navigator.share) {
@@ -183,22 +211,22 @@ const SingleFilterCard = ({ info}) => {
                         playSong(item.audio);
  
                     }}>
-                        <div>
+                       
                             <img
                                 src={item.thumb}
                                 alt=""
-                                className="w-14 h-14 object-cover  sm:mx-3"
+                                className="w-14 h-14 object-cover "
                             />
-                        </div>
-                        <div className="mx-6 sm:pl-5">
+                        
+                        <div className="mx-6 md:ml-6">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="white" d="M21.409 9.353a2.998 2.998 0 0 1 0 5.294L8.597 21.614C6.534 22.736 4 21.276 4 18.968V5.033c0-2.31 2.534-3.769 4.597-2.648l12.812 6.968Z"/></svg>
                         </div>
                         <div>
                         
                         </div>
                          
-                        <div className="w-full">
-                            <div className="text-white flex justify-center flex-col sm:pl-4 ">
+                        <div className="w-full ">
+                            <div className="text-white flex justify-center flex-col md:pl-4 ">
                                 <div className="cursor-pointer hover:underline">
                                     
                                     {item.name}
@@ -208,36 +236,21 @@ const SingleFilterCard = ({ info}) => {
                                 {item.artis_name}
                                 </div>
                             </div>
-            
-         
-                        </div>
-                        {/* <audio
-        ref={audioRef}
-        src={item.audio}
-        onTimeUpdate={updateTime}
-        onLoadedMetadata={updateDuration}
-      />
-            
-                            <input
-        type="range"
-        className="w-64"
-        min="0"
-        max={duration}
-        value={currentTime}
-        onChange={handleSeek}
-      />
-        <div className="mt-2">
-        <span>{formatTime(currentTime)}</span>
-        <span className="mx-2">/</span>
-        <span>{formatTime(duration)}</span>
-      </div> */}
+          
+                         </div>
                        </div>
-                         {/* Music Player Component
-          <div className="flex items-center">
-            <MusicPlayer songSrc={item.audio} />
-          </div> */}
-          <div className="flex md:p-4 ml-auto">
-                       
+            
+                       {/* <div className="flex w-full ml-auto">
+                       <audio ref={audioRef} src={item.audio}></audio>
+                       <ProgressBar 
+            currentTime={currentTime}
+            duration={currentDuration}
+            isPlaying={isPlaying}
+            onSeek={handleSeek}
+          />
+       </div> */}
+
+          <div className="flex md:p-4 ml-auto">            
                        <Icon
                         icon="ri:download-line" 
                         color="white" 
