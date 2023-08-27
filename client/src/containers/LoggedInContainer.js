@@ -5,64 +5,20 @@ import songContext from "../contexts/songContext";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import Sidebar from "../components/Sidebar";
-import ProgressBar from "../components/ProgressBar";
+ 
 
 const LoggedInContainer = ({info, children}) => {
-    const [isPlaying, setIsPlaying] = useState(false);
+   
     const [currentTime, setCurrentTime] = useState(0);
-    const [currentDuration, setCurrentDuration] = useState(0);
-    const [songIndex, setSongIndex] = useState(0);
-    
+    const [duration, setDuration] = useState(0);
+    const [progressBarWidth, setProgressBarWidth] = useState(0);
  
    const mySongs=[...info]
-    
-  
-    const audioRef = useRef(null);
-  
-    useEffect(() => {
-      if (audioRef.current) {
-        audioRef.current.load();
-  
-        audioRef.current.addEventListener('loadedmetadata', () => {
-          setCurrentDuration(audioRef.current.duration);
-        });
-  
-        audioRef.current.addEventListener('play', () => {
-          setIsPlaying(true);
-        });
-  
-        audioRef.current.addEventListener('pause', () => {
-          setIsPlaying(false);
-        });
-  
-        audioRef.current.addEventListener('timeupdate', () => {
-          setCurrentTime(audioRef.current.currentTime);
-        });
-      }
-    }, [songIndex]);
-  
-    const playSong = (index) => {
-      setSongIndex(index);
-      if (audioRef.current) {
-        audioRef.current.play();
-      }
-    };
-  
-    const pauseSong = () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
-  
-    const handleSeek = (seekTime) => {
-      if (audioRef.current) {
-        audioRef.current.currentTime = seekTime;
-        setCurrentTime(seekTime);
-      }
-    };
 
-    
 
+   const animationFrameRef = useRef(null);
+  
+  
     const [showSearch, setShowSearch] = useState(false); // State to control search bar visibility
     const [volume, setVolume] = useState(100);
 
@@ -73,7 +29,7 @@ const LoggedInContainer = ({info, children}) => {
     };
 
     const [searchResults, setSearchResults] = useState([]); // Store search results
-    console.log(mySongs)
+  
     const handleSearch = (query) => {
       // Filter records based on query
       
@@ -88,8 +44,7 @@ const LoggedInContainer = ({info, children}) => {
   
       setSearchResults(filteredResults);
     };
-    console.log(mySongs)
-    // console.log({info})
+ 
     const {
         currentSong,
         setCurrentSong,
@@ -101,9 +56,8 @@ const LoggedInContainer = ({info, children}) => {
 
     
 
-    console.log(mySongs)
+   
     const records =mySongs;
-    console.log(mySongs)
      
 
     const [filterName, setFilterName] = useState("");
@@ -117,14 +71,81 @@ const LoggedInContainer = ({info, children}) => {
 
    
 
+    const songUrl = currentSong ? currentSong.audio : "";
+
+    let sound;
+
+   
+const startAnimationFrameLoop = () => {
+    console.log("frameloop")
+    const updateProgress = () => {
+      setCurrentTime(sound.seek());
+      setProgressBarWidth((sound.seek() / duration) * 100);
+  
+      animationFrameRef.current = requestAnimationFrame(updateProgress);
+    };
+    animationFrameRef.current = requestAnimationFrame(updateProgress);
+  };
+  
+ useEffect(() => {
+console.log("vhvkkjlk")
+  if (songUrl) {
+    console.log(songUrl)
+    sound = new Howl({
+      src: [songUrl],
+      html5: true,
+      onplay: () => {
+        setSoundPlayed(true);
+        console.log("song played")
+        startAnimationFrameLoop();
+      },
+      onpause: () => {
+        setSoundPlayed(false);
+        cancelAnimationFrame(animationFrameRef.current);
+        console.log("song paused")
+      },
+      onseek: () => {
+        setCurrentTime(sound.seek());
+        setProgressBarWidth((sound.seek() / duration) * 100);
+        console.log("onseek")
+      },
+      onload: () => {
+        setDuration(sound.duration());
+        console.log("onload")
+      },
+    });
+    console.log(sound.seek())
+  }
+   return () => {
+    if (sound) {
+      sound.unload();
+    }
+  };
+}, [songUrl, setSoundPlayed, currentTime]);
 
 
+      
+    console.log("Updating currentTime:", currentTime);  
+    console.log("duration of song:", duration);  
+  
+
+
+    const handleSeek = (time) => {
+        if (soundPlayed) {
+          soundPlayed.seek(time);
+          setCurrentTime(time);
+          setProgressBarWidth((time / duration) * 100);
+        }
+      };
+
+        
     useEffect(() => {
         if (currentSong) {
             changeSong(currentSong.audio);
         }
     }, [currentSong]);
 
+    
     const playSound = () => {
         if (soundPlayed) {
             soundPlayed.play();
@@ -236,6 +257,13 @@ const LoggedInContainer = ({info, children}) => {
         
     };
 
+    function formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}:${remainingSeconds}`;
+      }
+
+   
     // document.addEventListener("keypress", (event) => {
     //     if(event.keycode === 32 || event.key === " "){
     //         event.preventDefault();
@@ -325,13 +353,14 @@ const LoggedInContainer = ({info, children}) => {
                                 className="cursor-pointer   text-white mx-2 sm:mx-4"
                                 onClick={playNextSong}
                             />
-                           
+                           <div className="hidden md:block md:ml-16">
+                           {formatTime(currentTime)}/{formatTime(duration)}
+                           </div>
                         </div>
-     
-       
+              
                     </div>
 
-                     {/* Progress bar */}
+                    
   
                         <div className="w-1/2 mb-1">
                             <div className="hidden md:block text-sm  cursor-pointer text-white">
@@ -349,13 +378,22 @@ const LoggedInContainer = ({info, children}) => {
 
                       
                     </div>
-                    {/* <audio ref={audioRef} src={currentSong.audio}></audio>
-      <ProgressBar
-        currentTime={currentTime}
-        duration={currentDuration}
-        isPlaying={isPlaying}
-        onSeek={handleSeek}
-      /> */}
+      {/* progres bar */}
+                    <div className="relative mb-8 w-1/2 h-4 mr-14 bg-gray-300">
+        <div
+          className="absolute h-full  bg-green-500"
+          style={{ width: `${(currentTime / duration) * 100}%` }}
+        />
+        <input
+          type="range"
+          min={0}
+          max={duration}
+          value={currentTime}
+          onChange={(e) => handleSeek(e.target.value)}
+          className="w-full h-full appearance-none cursor-pointer"
+        />
+      </div>
+
                     <div className="flex mb-8">
                     <Icon icon="ri:download-line" color="white" className="hidden md:block mx-2 sm:mx-4 sm:h-5 sm:w-5   hover:cursor-pointer"
                          onClick={() => handleDownload(currentSong.audio)}
