@@ -19,9 +19,10 @@ const SingleFilterCard = ({ info}) => {
     const [isPlaying, setIsPlaying] = useState(false); // Song playing status
     
     
-  
+ 
 
     const songs = info;
+    
 //   console.log(songs)
    // List of keywords for filtering
    const filterKeywords = [
@@ -31,51 +32,7 @@ const SingleFilterCard = ({ info}) => {
      // Add more keywords here
    ];
 
-   const [currentTime, setCurrentTime] = useState(0);
-   const [currentDuration, setCurrentDuration] = useState(0);
  
-  
-
-   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.load();
-
-      audioRef.current.addEventListener('loadedmetadata', () => {
-        setCurrentDuration(audioRef.current.duration);
-      });
-
-      audioRef.current.addEventListener('play', () => {
-        setIsPlaying(true);
-      });
-
-      audioRef.current.addEventListener('pause', () => {
-        setIsPlaying(false);
-      });
-
-      audioRef.current.addEventListener('timeupdate', () => {
-        setCurrentTime(audioRef.current.currentTime);
-      });
-    }
-  }, []);
- 
-  const handleSeek = (seekTime) => {
-    if (audioRef.current) {
-      audioRef.current.currentTime = seekTime;
-      setCurrentTime(seekTime);
-    }
-  };
-
-  useEffect(() => {
-    // Load the audio when the component mounts
-    if (audioRef.current) {
-      audioRef.current.load();
-
-      // Listen for loadedmetadata to get the song duration
-      audioRef.current.addEventListener('loadedmetadata', () => {
-        setCurrentDuration(audioRef.current.duration);
-      });
-    }
-  }, []);
 
 
 
