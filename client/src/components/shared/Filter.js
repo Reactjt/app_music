@@ -88,6 +88,7 @@ const SingleFilterCard = ({ info}) => {
         html5: true,
         onplay: () => {
             setIsPlaying(true);
+            console.log("filter onplay")
             requestAnimationFrame(updateProgress);
         },
         onpause: () => {
