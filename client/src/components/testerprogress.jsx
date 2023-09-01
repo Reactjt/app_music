@@ -1,81 +1,47 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
-import { Howl } from "howler";
-import songContext from "../contexts/songContext";
+import React, { useState, useRef } from "react";
 
 const TestMusicPlayer = () => {
+  const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
 
-  const animationFrameRef = useRef(null);
+  const audioRef = useRef(null);
 
-  // Access the context values and functions
-  const {
-    currentSong,
-    soundPlayed,
-    setSoundPlayed,
-    isPaused,
-    setIsPaused
-  } = useContext(songContext);
-
-  // Use the appropriate context variables
-  const songUrl = currentSong ? currentSong.audio : "";
-
-  useEffect(() => {
-    const sound = new Howl({
-      src: [songUrl],
-      html5: true,
-      onplay: () => {
-        setSoundPlayed(true); // Use setSoundPlayed from context
-        startAnimationFrameLoop();
-      },
-      onpause: () => {
-        setSoundPlayed(false); // Use setSoundPlayed from context
-        cancelAnimationFrame(animationFrameRef.current);
-      },
-      onseek: () => {
-        setCurrentTime(sound.seek());
-      },
-      onload: () => {
-        setDuration(sound.duration());
-      }
-    });
-
-    return () => {
-      sound.unload();
-    };
-  }, [songUrl, setSoundPlayed]);
-
-  const startAnimationFrameLoop = () => {
-    const updateProgress = () => {
-      setCurrentTime(soundPlayed.seek());
-      animationFrameRef.current = requestAnimationFrame(updateProgress);
-    };
-    animationFrameRef.current = requestAnimationFrame(updateProgress);
-  };
+  const songUrl = "YOUR_SONG_URL_HERE"; // Replace with your song URL
 
   const handlePlay = () => {
-    if (soundPlayed) {
-      soundPlayed.play(); // Use soundPlayed from context
-    }
+    audioRef.current.play();
+    setIsPlaying(true);
   };
 
   const handleStop = () => {
-    if (soundPlayed) {
-      soundPlayed.pause(); // Use soundPlayed from context
-    }
+    audioRef.current.pause();
+    setIsPlaying(false);
   };
 
   const handleSeek = (time) => {
-    if (soundPlayed) {
-      soundPlayed.seek(time);
-      setCurrentTime(time);
-    }
+    audioRef.current.currentTime = time;
+    setCurrentTime(time);
+  };
+
+  const handleTimeUpdate = () => {
+    setCurrentTime(audioRef.current.currentTime);
+  };
+
+  const handleLoadedMetadata = () => {
+    setDuration(audioRef.current.duration);
   };
 
   return (
     <div className="w-full max-w-md mx-auto p-4">
+      <audio
+        ref={audioRef}
+        src={songUrl}
+        onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={handleLoadedMetadata}
+      />
       <div className="mb-4">
-        {soundPlayed && soundPlayed.playing() ? (
+        {isPlaying ? (
           <button onClick={handleStop} className="bg-red-500 text-white p-2">
             Stop
           </button>
