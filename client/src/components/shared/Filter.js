@@ -5,8 +5,7 @@ import { Howl } from "howler";
 import filteredInfoContext from "../../contexts/FilteredinfoContext";
 import { play } from "../../assets";
 import {Icon} from "@iconify/react"
-import MusicPlayer from "../MusicPlayer.js";
-import ProgressBar from "../ProgressBar";
+ import "./filter.css"
  
 
 
@@ -19,8 +18,20 @@ const SingleFilterCard = ({ info}) => {
     const [isPlaying, setIsPlaying] = useState(false); // Song playing status
     
     
- 
+    const [scrollY, setScrollY] = useState(0);
 
+    const handleScroll = () => {
+        setScrollY(window.scrollY);
+      };
+
+      useEffect(() => {
+        window.addEventListener("scroll", handleScroll);
+        return () => {
+          window.removeEventListener("scroll", handleScroll);
+        };
+      }, []);
+
+      
     const songs = info;
     
 //   console.log(songs)
@@ -152,13 +163,14 @@ const SingleFilterCard = ({ info}) => {
         return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
       };
   
+const threshold = 200;
 
     return (
         <div>
             {filteredinfo.map((item, index) => (
                 <div 
                     key={index}
-                    className="p-2"
+                    className={`p-2 ${scrollY > threshold ? "song-fade" : ""}`}
                      
             
                 >
