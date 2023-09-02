@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useRef, useState } from "react";
+ import React, { useContext, useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import songContext from "../contexts/songContext";
 import Navbar from "../components/Navbar";
@@ -44,6 +44,8 @@ const LoggedInContainer = ({ info, children }) => {
   } = useContext(songContext);
 
   const records = mySongs;
+  const firstsong = info[0];
+
 
   const [filterName, setFilterName] = useState("");
 
@@ -53,6 +55,10 @@ const LoggedInContainer = ({ info, children }) => {
 
   const songUrl = currentSong ? currentSong.audio : "";
   const audioRef = useRef(new Audio()); // Create an audio element using useRef
+
+  
+ 
+  
 
   useEffect(() => {
     
@@ -79,14 +85,27 @@ const LoggedInContainer = ({ info, children }) => {
   }, []);
 
   useEffect(() => {
-    if (currentSong) {
+    if (currentSong ) {
       audioRef.current.src = currentSong.audio;
-      playSound();
+       
+      if (!isPaused) {
+        audioRef.current.play();
+      }
     } else {
-      audioRef.current.pause();
+      pauseSound();
       audioRef.current.currentTime = 0;
     }
-  }, [currentSong]);
+  }, [currentSong, isPaused]);
+  
+
+ 
+   useEffect(() => {
+    if (!currentSong && info.length > 0) {
+      setCurrentSong(firstsong);
+      setIsPaused(true)
+    }
+  }, [currentSong, info]);
+
 
   const playSound = () => {
     audioRef.current.play();
@@ -106,6 +125,8 @@ const LoggedInContainer = ({ info, children }) => {
       pauseSound();
     }
   };
+
+  
 
   const handleSeek = (time) => {
     audioRef.current.currentTime = time;
@@ -170,6 +191,8 @@ const LoggedInContainer = ({ info, children }) => {
       sound: null, // Clear the sound
     });
   };
+
+
 
   function formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
@@ -300,20 +323,19 @@ const LoggedInContainer = ({ info, children }) => {
             <div className="hidden md:flex items-center mb-8">
               <Icon icon="subway:sound" color="white" />
               <input
-                type="range"
-                min="0"
-                max="100"
-                step="1"
-                value={volume}
-                onChange={(e) => {
-                  const newVolume = parseInt(e.target.value);
-                  setVolume(newVolume);
-                  if (soundPlayed) {
-                    soundPlayed.volume(newVolume / 100); // Update the volume of the currently playing sound
-                  }
-                }}
-                className="w-24 t"
-              />
+  type="range"
+  min="0"
+  max="100"
+  step="1"
+  value={volume}
+  onChange={(e) => {
+    const newVolume = parseInt(e.target.value);
+    setVolume(newVolume);
+    audioRef.current.volume = newVolume / 100; 
+  }}
+  className="w-24"
+/>
+
             </div>
           </div>
         )}
