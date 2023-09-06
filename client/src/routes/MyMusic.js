@@ -1,74 +1,376 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import SingleSongCard from "../components/shared/SingleSongCard";
- 
-import LoggedInContainer from "../containers/LoggedInContainer";
+import React, { useContext, useEffect, useRef, useState } from "react";
+import { Icon } from "@iconify/react";
+import songContext from "../contexts/songContext";
+import Navbar from "../components/Navbar";
+import SearchBar from "../components/SearchBar";
+import Sidebar from "../components/Sidebar";
+import WaveSurfer from "wavesurfer.js"; 
 
-const MyMusic = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-    const [songsData, setSongsData] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [apiCompleted, setApiCompleted] = useState(false);
-  
-    useEffect(() => {
-      axios
-        .post("http://localhost:5000/api/fetch-songs", {
-          post: 0,
-          page: currentPage,
-          single_page: "staging2.syncorstream.com",
-          per_page: 10,
-          categories: "43,16,189,179,180,209,44,45,17,32,33,181,36,182,37,210,38,39,40,41,190,98,97,96,95,94,93,92,91,90,89,88,87,86,122,123,124,2,70,3,4,138,71,72,73,74,133,75,77,119,78,79,80,81,82,83,84,135,112,114,109,108,111,110,118,113,139,53,6,101,54,55,56,105,104,136,57,117,58,134,7,106,137,59,60,61,66,67,103,115,68,120,62,64,116,63,65,102,69",
-          user: 155,
-        })
-        .then(response => {
-        //   console.log("API Response:", response.data);
-          setSongsData(response.data);
-          setLoading(false);
-          setApiCompleted(true); 
-        })
-        .catch(error => {
-          console.error("Error fetching songs:", error);
-          setError(error.message);
-          setLoading(false);
-          setApiCompleted(true); 
-        });
-    }, [currentPage]);
-  
-    if (loading) {
-      return <p>Loading...</p>;
-    }
-  
-    if (error) {
-      return <p>Error: {error}</p>;
-    }
+const LoggedInContainer = ({ info, children }) => {
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [progressBarWidth, setProgressBarWidth] = useState(0);
 
-    const handleLoadMore = () => {
-      setCurrentPage(prevPage => prevPage + 1);
-    };
+  const mySongs = [...info];
 
+  const [showSearch, setShowSearch] = useState(false);
+  const [volume, setVolume] = useState(100);
 
-    return (
-        <LoggedInContainer info={songsData}  curActiveScreen="myMusic">
-           
-            {apiCompleted ?  /* Only render if API call is completed */
-    (
-        <SingleSongCard info={songsData} />
-        
-      ) : (
-        <p>No songs data available.</p>
-      )
-    }
-            <button onClick={handleLoadMore} className="text-blue-500 ">
-              Load More
-            </button>
-         
-        </LoggedInContainer>
+  const [isExpanded, setIsExpanded] = useState(false);
+  const handleLogoClick = () => {
+    setShowSearch(!showSearch);
+    setIsExpanded(!isExpanded);
+  };
+
+  const [searchResults, setSearchResults] = useState([]);
+
+  const handleSearch = (query) => {
+    const filteredResults = info.filter(
+      (record) =>
+        record.name.toLowerCase().includes(query.toLowerCase()) ||
+        record.artis_name.toLowerCase().includes(query.toLowerCase()) ||
+        record.flt_name.includes(query.toLowerCase())
     );
+
+    setSearchResults(filteredResults);
+  };
+
+  const {
+    currentSong,
+    setCurrentSong,
+    soundPlayed,
+    setSoundPlayed,
+    isPaused,
+    setIsPaused,
+  } = useContext(songContext);
+
+  const records = mySongs;
+  const firstsong = info[0];
+
+
+
+  const waveSurferRef = useRef(null); // Create a ref for WaveSurfer instance
+
+  // Initialize WaveSurfer when the component mounts
+  useEffect(() => {
+    if (!waveSurferRef.current) {
+      waveSurferRef.current = WaveSurfer.create({
+        container: "#waveform-container", // Specify the container for the waveform
+        responsive: true,
+        waveColor: "gray", // Customize waveform colors
+        progressColor: "green",
+        cursorWidth: 1,
+        cursorColor: "red",
+        height: 100, // Adjust the height of the waveform
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    // Update the waveform when the current song changes
+    if (currentSong) {
+      // Load the audio for the current song
+      waveSurferRef.current.load(currentSong.audio);
+
+      // Play the audio if it's not paused
+      if (!isPaused) {
+        waveSurferRef.current.play();
+      }
+    } else {
+      // Pause the waveform and reset its position
+      waveSurferRef.current.pause();
+      waveSurferRef.current.seekTo(0);
+    }
+  }, [currentSong]);
+
+
+
+
+
+
+  const [filterName, setFilterName] = useState("");
+
+  const filteredRecords = records.filter((record) => {
+    return record.name.toLowerCase().includes(filterName.toLowerCase());
+  });
+
+  const songUrl = currentSong ? currentSong.audio : "";
+  const audioRef = useRef(new Audio()); // Create an audio element using useRef
+
+  
+ 
+  
+
+  useEffect(() => {
+    
+    audioRef.current.addEventListener("timeupdate", () => {
+      setCurrentTime(audioRef.current.currentTime);
+      setProgressBarWidth(
+        (audioRef.current.currentTime / audioRef.current.duration) * 100
+      );
+    });
+
+    audioRef.current.addEventListener("durationchange", () => {
+      setDuration(audioRef.current.duration);
+    });
+
+    audioRef.current.addEventListener("ended", () => {
+      playNextSong();
+      
+    });
+
+    return () => {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (currentSong ) {
+      audioRef.current.src = currentSong.audio;
+       
+      if (!isPaused) {
+        audioRef.current.play();
+      }
+    } else {
+      pauseSound();
+      audioRef.current.currentTime = 0;
+    }
+  }, [currentSong, isPaused]);
+  
+
+ 
+   useEffect(() => {
+    if (!currentSong && info.length > 0) {
+      setCurrentSong(firstsong);
+      setIsPaused(true)
+    }
+  }, [currentSong, info]);
+
+
+  const playSound = () => {
+    audioRef.current.play();
+    console.log("paly")
+    setIsPaused(false);
+  };
+
+  const pauseSound = () => {
+    audioRef.current.pause();
+    setIsPaused(true);
+  };
+
+  const togglePlayPause = () => {
+    if (isPaused) {
+      playSound();
+    } else {
+      pauseSound();
+    }
+  };
+
+  
+
+  const handleSeek = (time) => {
+    audioRef.current.currentTime = time;
+    setCurrentTime(time);
+    setProgressBarWidth((time / duration) * 100);
+  };
+
+  const playNextSong = () => {
+    if (!currentSong || !currentSong.audio) {
+      console.log("Error: Missing current song");
+      return;
+    }
+
+    if (!info) {
+      console.log("Error: Missing info");
+      return;
+    }
+
+    if (!info) {
+      console.log("Error: Missing records in info");
+      return;
+    }
+
+    const currentIndex = info.findIndex(
+      (song) => song.audio === currentSong.audio
+    );
+    if (currentIndex === -1) {
+      console.log("Error: Current song not found in records");
+      return;
+    }
+
+    const nextIndex = (currentIndex + 1) % info.length; // Circular next
+    const nextSong = info[nextIndex];
+
+    if (currentSong.sound) {
+      currentSong.sound.pause(); // Pause the current sound
+    }
+
+    setCurrentSong({
+      ...nextSong,
+      sound: null, // Clear the sound
+    });
+  };
+
+  const playPreviousSong = () => {
+    if (!currentSong || !currentSong.audio || !info || !info) {
+      return; // No current song to play previous from
+    }
+
+    const currentIndex = info.findIndex(
+      (song) => song.audio === currentSong.audio
+    );
+    const previousIndex = (currentIndex - 1 + info.length) % info.length; // Circular previous
+    const previousSong = info[previousIndex];
+
+    if (currentSong.sound) {
+      currentSong.sound.pause(); // Pause the current sound
+    }
+
+    setCurrentSong({
+      ...previousSong,
+      sound: null, // Clear the sound
+    });
+  };
+
+
+
+  function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+  }
+
+  const handleDownload = (audioUrl) => {
+    // Use the "download" attribute to initiate download
+    const link = document.createElement("a");
+    link.href = audioUrl;
+    link.download = "song.mp3";
+    link.click();
+  };
+
+  return (
+    <div className="h-full w-full bg-zinc-900  ">
+      <Navbar onLogoClick={handleLogoClick} /> {/* Pass onLogoClick prop */}
+      {/* Add the SearchBar component */}
+      <div className="py-6 flex justify-center ">
+        {showSearch && <SearchBar records={info} onSearch={handleSearch} />}
+      </div>
+      {/* Render search results */}
+      {searchResults.map((result) => (
+        <div key={result.id}>
+          {/* Display search results here */}
+          {/* You can format and display the results as needed */}
+        </div>
+      ))}
+      {/* Filter input */}
+      <div className="flex-grow overflow-hidden">
+        <div className="h-9/10 w-full flex">
+          {/* This first div will be the left panel */}
+          <Sidebar info={info} />
+          {/* This second div will be the right part(main content) */}
+          <div className=" md:h-full md:w-4/5  bg-zinc-900 text-white  overflow-auto  md:ml-auto">
+            <div
+              className={` md:p-4 pt-0  overflow-auto ${
+                isExpanded
+                  ? "max-h-50 min-h-50   lg:max-h-50 lg:min-h-50 md:max-h-35 md:min-h-35"
+                  : "max-h-50 min-h-50 lg.max-h-50 lg.min-h-50 md.max-h-35 md.min-h-35"
+              } `}
+            >
+              {children}
+            </div>
+          </div>
+        </div>
+        {/* This div is the current playing song */}
+        {currentSong && (
+          <div className="w-full h-1/10 py-8 sm:py-5 justify-center align-middle   bg-zinc-900  text-white flex items-center px-4 fixed bottom-0">
+            <div className="w-full flex items-center mb-8">
+              <img
+                src={currentSong.thumb}
+                alt="currentSongThumbail"
+                className="h-16 w-16 sm:h-20 sm:w-20 mr-6 object-cover sm:mx-10 rounded"
+              />
+              <div className="w-1/2 flex justify-center h-full flex-col items-left sm:mx-10">
+                <div className="flex items-center">
+                  {/* controls for the playing song go here */}
+                  <Icon
+                    icon="mdi:skip-previous-outline"
+                    fontSize={30}
+                    className="cursor-pointer   text-white mx-2 sm:mx-4"
+                    onClick={playPreviousSong}
+                  />
+                  <Icon
+                    icon={
+                      isPaused
+                        ? "solar:play-bold"
+                        : "solar:pause-bold"
+                    }
+                    className="cursor-pointer w-6 h-6 text-white"
+                    onClick={togglePlayPause}
+                  />
+                  <Icon
+                    icon="mdi:skip-next-outline"
+                    fontSize={30}
+                    className="cursor-pointer   text-white mx-2 sm:mx-4"
+                    onClick={playNextSong}
+                  />
+                  <div className="hidden md:block md:ml-16">
+                    {formatTime(currentTime)}/{formatTime(duration)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="w-1/2 mb-1">
+                <div className="hidden md:block text-sm  cursor-pointer text-white">
+                  {currentSong.name}
+                </div>
+
+                <div className="hidden md:block text-xs text-gray-500   cursor-pointer">
+                  {currentSong.artis_name}
+                </div>
+              </div>
+            </div>
+            {/* progress bar */}
+            <div id="waveform-container" className="w-1/2 mb-8"></div>
+        
+
+            <div className="flex mb-8">
+              <Icon
+                icon="ri:download-line"
+                color="white"
+                className="hidden md:block mx-2 sm:mx-4 sm:h-5 sm:w-5   hover:cursor-pointer"
+                onClick={() => handleDownload(currentSong.audio)}
+              />
+              <Icon
+                icon="ph:star-fill"
+                color="white"
+                className="hidden md:block mx-2 sm:mx-4 sm:h-5 sm:w-5 hover:cursor-pointer"
+              />
+            </div>
+
+            {/* Volume Slider */}
+            <div className="hidden md:flex items-center mb-8">
+              <Icon icon="subway:sound" color="white" />
+              <input
+  type="range"
+  min="0"
+  max="100"
+  step="1"
+  value={volume}
+  onChange={(e) => {
+    const newVolume = parseInt(e.target.value);
+    setVolume(newVolume);
+    audioRef.current.volume = newVolume / 100; 
+  }}
+  className="w-24"
+/>
+
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
-export default MyMusic;
-
- 
-
- 
+export default LoggedInContainer;
