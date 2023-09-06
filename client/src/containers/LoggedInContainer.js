@@ -178,7 +178,7 @@ const LoggedInContainer = ({ info, children, }) => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
       waveSurferRef.current.un("audioprocess");
-      // waveSurferRef.current.un("finish")
+      //// waveSurferRef.current.un("finish")
     };
   }, [currentSong]);
 
