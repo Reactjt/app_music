@@ -57,13 +57,14 @@ const LoggedInContainer = ({ info, children, }) => {
    
 
     const initializeWaveSurfer = () => {
-      if(!waveformContainerRef.current.id){
+      if(!waveformContainerRef.current){
         return;
       }
       // console.log("Container element:", waveformContainerRef.current);  
       // console.log("Container element:", waveformContainerRef.current.id);  
       const id = waveformContainerRef.current.id;
       console.log(id)
+      console.log(waveSurferRef.current)
       if (!waveSurferRef.current) {
         waveSurferRef.current = WaveSurfer.create({
           container: `#${id}`,
@@ -73,10 +74,27 @@ const LoggedInContainer = ({ info, children, }) => {
           height: 60,
           width: 50
         });
+
+
+        if(!waveSurferRef.current){
+          return;
+        }
+           waveSurferRef.current.on("seek", (progress) => {
+      // Calculate the new audio current time based on the waveform progress
+      const newTime = progress * audioRef.current.duration;
+      audioRef.current.currentTime = newTime;
+      setCurrentTime(newTime);
+    });
+
+      if (currentSong) {
+      audioRef.current.src = currentSong.audio;
+      waveSurferRef.current.load(currentSong.audio);
+      audioRef.current.volume = volume / 100;
+      setCurrentTime(0);
+    }
       }
     };
-//  console.log("Container element:", waveformContainerRef.current.id); 
-//     console.log(document.readyState);
+ 
 
     if (document.readyState === "interactive" || document.readyState === "complete") {
       console.log("jbnkjnk");
@@ -96,19 +114,19 @@ const LoggedInContainer = ({ info, children, }) => {
   
   
   useEffect(() => {
+    console.log(waveSurferRef.current)
+    if(!waveSurferRef.current){
+      return;
+    }
+    console.log(waveSurferRef.current)
      // Update the waveform when the current song changes
      if (currentSong) {
       // Load the audio for the current song
       waveSurferRef.current.load(currentSong.audio);
-  
+      console.log(waveSurferRef.current.play)
       // Play the audio if it's not paused
-      if (!isPaused) {
-        waveSurferRef.current.play();
-      }
-    } else {
-      // Pause the waveform and reset its position
-      waveSurferRef.current.pause();
-    }
+      
+    }  
   }, [currentSong]);
   
   
@@ -159,7 +177,8 @@ const LoggedInContainer = ({ info, children, }) => {
       audioRef.current.src = currentSong.audio;
        
       if (!isPaused) {
-        audioRef.current.play();
+      audioRef.current.play();
+        waveSurferRef.current.play();
       }
     } else {
       pauseSound();
@@ -177,19 +196,35 @@ const LoggedInContainer = ({ info, children, }) => {
   }, [currentSong, info]);
 
 
-  const playSound = () => {
-    audioRef.current.play();
-    
-    console.log("paly")
+  const playSound = async () => {
+    if(!waveSurferRef.current){
+      return;
+    }
+   
+    try {
+      await Promise.all([ audioRef.current.play(),
+         waveSurferRef.current.play()]);
+    } catch (error) {
+      console.error("Error playing audio:", error);
+    }
     setIsPaused(false);
   };
 
-  const pauseSound = () => {
-    audioRef.current.pause();
-   
+  const pauseSound = async () => {
+    if (!waveSurferRef.current) {
+      return;
+    }
+  
+    try {
+      await Promise.all([audioRef.current.pause(),
+         waveSurferRef.current.pause()]);
+    } catch (error) {
+      console.error("Error pausing audio:", error);
+    }
+  
     setIsPaused(true);
   };
-
+  
   const togglePlayPause = () => {
     if (isPaused) {
       playSound();
@@ -200,12 +235,7 @@ const LoggedInContainer = ({ info, children, }) => {
 
   
 
-  const handleSeek = (time) => {
-    audioRef.current.currentTime = time;
-    setCurrentTime(time);
-    setProgressBarWidth((time / duration) * 100);
-  };
-
+ 
   const playNextSong = () => {
     if (!currentSong || !currentSong.audio) {
       console.log("Error: Missing current song");
