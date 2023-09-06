@@ -15,7 +15,7 @@ const Sidebar = ({info}) => {
   const { selectedFilter, setSelectedFilter } = useContext(filteredInfoContext);
 
   const songs = info.records;
-  console.log(songs)
+ 
    // List of keywords for filtering
    const filterKeywords = [
      "80-89", "Bass", "Confident", "Drums", "Guitar", "Hip-Hop", "Latin","Medium Energy",

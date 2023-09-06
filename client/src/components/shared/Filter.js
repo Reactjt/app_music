@@ -55,6 +55,7 @@ const SingleFilterCard = ({ info}) => {
 //   console.log(filteredinfo)
      
     const { currentSong, setCurrentSong } = useContext(songContext);
+    const {wavformid, setWaveformid} = useContext(songContext);
 
     // Ensure that info and info.records are defined before accessing them
     if (!info  || !Array.isArray(info)) {
@@ -109,6 +110,7 @@ const SingleFilterCard = ({ info}) => {
             setCurrentSong((prevCurrentSong) => ({
                 ...prevCurrentSong,
                 sound: null,
+                
             }));
             setIsPlaying(false);
             setProgress(0);
@@ -209,16 +211,7 @@ const threshold = 200;
           
                          </div>
                        </div>
-            
-                       {/* <div className="flex w-full ml-auto">
-                       <audio ref={audioRef} src={item.audio}></audio>
-                       <ProgressBar 
-            currentTime={currentTime}
-            duration={currentDuration}
-            isPlaying={isPlaying}
-            onSeek={handleSeek}
-          />
-       </div> */}
+          
 
           <div className="flex md:p-4 ml-auto">            
                        <Icon

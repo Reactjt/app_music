@@ -7,6 +7,8 @@ const songContext = createContext({
     setSoundPlayed: () => {},
     isPaused: null,
     setIsPaused: () => {},
+    waveformid: "waveform-container",
+    setWaveformid: () => {}
     
 });
 
