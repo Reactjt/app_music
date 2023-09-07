@@ -141,7 +141,7 @@ const LoggedInContainer = ({ info, children, }) => {
   });
 
   const songUrl = currentSong ? currentSong.audio : "";
-  const audioRef = useRef(new Audio()); // Create an audio element using useRef
+  const audioRef = useRef(new Audio()); // ////Create an audio element using useRef
 
   
  
@@ -149,41 +149,48 @@ const LoggedInContainer = ({ info, children, }) => {
 
   useEffect(() => {
     
+    if (!waveSurferRef.current) {
+      return;
+    }
+   
+    waveSurferRef.current.on("audioprocess", () => {
+      const newTime = waveSurferRef.current.getCurrentTime();
+      setCurrentTime(newTime);
+      // Optionally, you can also update the audio element's currentTime
+      audioRef.current.currentTime = newTime;
+    });
+   
+    // waveSurferRef.current.on("finish", () => {
+    //   playNextSong();
+    // });
+
     audioRef.current.addEventListener("timeupdate", () => {
-      setCurrentTime(audioRef.current.currentTime);
-      setProgressBarWidth(
-        (audioRef.current.currentTime / audioRef.current.duration) * 100
-      );
+      setCurrentTime(audioRef.current.currentTime); 
     });
 
     audioRef.current.addEventListener("durationchange", () => {
       setDuration(audioRef.current.duration);
     });
 
-    audioRef.current.addEventListener("ended", () => {
-      playNextSong(); 
-    });
-    
+   
 
     return () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
- 
+      waveSurferRef.current.un("audioprocess");
+      //// ////waveSurferRef.current.un("finish")
     };
   }, [currentSong]);
 
   useEffect(() => {
-    if (currentSong ) {
-      audioRef.current.src = currentSong.audio;
-       
-      if (!isPaused) {
-      audioRef.current.play();
-        waveSurferRef.current.play();
-      }
-    } else {
-      pauseSound();
-      audioRef.current.currentTime = 0;
+    if(!waveSurferRef.current){
+      return;
     }
+    console.log(waveSurferRef);
+    if (currentSong ) {
+      pauseSound();
+    
+    }  
   }, [currentSong]);
   
 
@@ -196,32 +203,21 @@ const LoggedInContainer = ({ info, children, }) => {
   }, [currentSong, info]);
 
 
-  const playSound = async () => {
+  const playSound = () => {
     if(!waveSurferRef.current){
       return;
     }
-   
-    try {
-      await Promise.all([ audioRef.current.play(),
-         waveSurferRef.current.play()]);
-    } catch (error) {
-      console.error("Error playing audio:", error);
-    }
+         waveSurferRef.current.play();
+  
     setIsPaused(false);
   };
 
-  const pauseSound = async () => {
+  const pauseSound = () => {
     if (!waveSurferRef.current) {
       return;
     }
-  
-    try {
-      await Promise.all([audioRef.current.pause(),
-         waveSurferRef.current.pause()]);
-    } catch (error) {
-      console.error("Error pausing audio:", error);
-    }
-  
+         waveSurferRef.current.pause();
+ 
     setIsPaused(true);
   };
   
