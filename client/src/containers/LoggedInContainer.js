@@ -160,23 +160,16 @@ const LoggedInContainer = ({ info, children, }) => {
       audioRef.current.currentTime = newTime;
     });
    
+    waveSurferRef.current.on("ready", () => {
+      setDuration(waveSurferRef.current.getDuration());
+    });
+
     // waveSurferRef.current.on("finish", () => {
     //   playNextSong();
     // });
-
-    audioRef.current.addEventListener("timeupdate", () => {
-      setCurrentTime(audioRef.current.currentTime); 
-    });
-
-    audioRef.current.addEventListener("durationchange", () => {
-      setDuration(audioRef.current.duration);
-    });
-
-   
+ 
 
     return () => {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
       waveSurferRef.current.un("audioprocess");
       //// ////waveSurferRef.current.un("finish")
     };
@@ -421,10 +414,16 @@ const LoggedInContainer = ({ info, children, }) => {
   onChange={(e) => {
     const newVolume = parseInt(e.target.value);
     setVolume(newVolume);
-    audioRef.current.volume = newVolume / 100; 
+    
+    // //Update the volume for WaveSurfer
+    if (waveSurferRef.current) {
+      waveSurferRef.current.setVolume(newVolume / 100);
+    }
+    
   }}
   className="w-24"
 />
+
 
             </div>
           </div>
