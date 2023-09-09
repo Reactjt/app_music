@@ -7,6 +7,7 @@ import filteredInfoContext from "./contexts/FilteredinfoContext";
 import FilteredSongs from "./routes/FilteredSongs";
   
 import { SidebarProvider } from "./contexts/Sidebarcontext";
+import { WaveformProvider } from "./contexts/WaveformContext";
  
 
 function App() {
@@ -19,7 +20,8 @@ function App() {
 
     return (
         <div className="w-screen h-screen font-poppins">
-            <BrowserRouter>       
+            <BrowserRouter>     
+            <WaveformProvider> 
                     <songContext.Provider
                         value={{
                             currentSong,
@@ -38,15 +40,14 @@ function App() {
                                      >
                                       <SidebarProvider>
                         <Routes>  
-                             
-
+  
                             <Route path="/" element={<FilteredSongs />} />
                         </Routes>
                         </SidebarProvider>
                         </filteredInfoContext.Provider>
  
                     </songContext.Provider>
-              
+                    </WaveformProvider> 
             </BrowserRouter>
         </div>
     );

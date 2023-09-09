@@ -8,6 +8,8 @@ import { play } from "../../assets";
 import {Icon} from "@iconify/react"
  import "./filter.css"
  import WaveSurfer from "wavesurfer.js"; 
+import Waveforms from "./Waveforms";
+import { useWaveformContext } from "../../contexts/WaveformContext";
 
 
 const SingleFilterCard = ({ info}) => {
@@ -63,78 +65,24 @@ const SingleFilterCard = ({ info}) => {
     const [waveforms, setWaveforms] = useState([]);
     const waveformContainerRef = useRef(null);
  
-    const [isWaveformPlaying, setIsWaveformPlaying] = useState(
-        new Array(filteredinfo.length).fill(false)
-      ); // Track play state for each waveform
- 
-    useEffect(() => {
-        console.error("useEffect runn");
-        // const usedIds = []; 
+     const  {isWaveformPlaying,setIsWaveformPlaying} = useWaveformContext();
       
-        const initializeWaveform = (audioUrl, id) => {
-          console.log("ID: " + id);
-          if(!waveformContainerRef.current){
-            return;
-          }
-          const element = waveformContainerRef.current;
-          console.log("eleeeeee: "+element)
-            
-            const ws = WaveSurfer.create({
-              container: element,
-              responsive: true,
-              barWidth: 2,
-              barHeight: 4,
-              barGap: null,
-              height: 50,
-              progressColor: "rgba(255, 255, 255, 0.7)",
-              waveColor: "rgba(255, 255, 255, 0.4)",
-              cursorWidth: 0,
-            });
-      
-            ws.load(audioUrl);
-      
-            ws.on("play", () => {
-              setIsWaveformPlaying((prev) =>
-                prev.map((value, index) => (index === id ? true : value))
-              );
-            });
-      
-            ws.on("pause", () => {
-              setIsWaveformPlaying((prev) =>
-                prev.map((value, index) => (index === id ? false : value))
-              );
-            });
-      
-            setWaveforms((prevWaveforms) => [...prevWaveforms, ws]);
-         
-        
-        
-        };
-   
-        filteredinfo.forEach((song) => {
-        //    usedIds.push(index);
-         
-          initializeWaveform(song.audio, song.id);
-        
-        });
-      
-        return () => {
-          waveforms.forEach((ws) => {
-            ws.destroy();
-          });
-        };
-      }, [filteredinfo]);
-      
+      console.log(isWaveformPlaying)
+      console.log(setIsWaveformPlaying)
+     
       
       const playySong = (index) => {
         if(!waveforms){
             return;
         }
-        console.log("nefkjnerkfknkfe"+waveforms)
+      
+       console.log("waveformmms",waveforms)
         const waveform = waveforms[index];
+        
    if(!waveform){
     return;
    }
+   console.log("waveformmmmmmmmmm:"+waveform)
         if (waveform) {
             console.error(waveform)
           if (isWaveformPlaying[index]) {
@@ -165,7 +113,7 @@ const SingleFilterCard = ({ info}) => {
         }
     
         if (currentSong && currentSong.sound && currentSong.audio === audioUrl) {
-            // Pause the audio if it's the same song that is already playing
+            // Pause the audio if _it's the same song that is already playing
             currentSong.sound.pause();
             setCurrentSong((prevCurrentSong) => ({ ...prevCurrentSong, sound: null })); // Clear the sound
         } else {
@@ -259,7 +207,7 @@ const threshold = 200;
 
     return (
         <div>
-            {filteredinfo.map((item, index) => (
+            {filteredinfo.map((item) => (
                
                 <div 
                     key={item.id}
@@ -274,12 +222,12 @@ const threshold = 200;
  
                     }}>
                                 <button
-                  onClick={() => playySong(index)}
+                  onClick={() => playySong(item.id)}
                   className="mx-2 sm:mx-4 sm:h-5 sm:w-5 hover:cursor-pointer"
                 >
-                  {isWaveformPlaying[index] ? "Pause" : "Play"}
+                  {isWaveformPlaying[item.id] ? "Pause" : "Play"}
                 </button>
-
+ 
                        
                             <img
                                 src={item.thumb}
@@ -307,11 +255,13 @@ const threshold = 200;
           
                          </div>
                        </div>
-                       <div
-                    ref={waveformContainerRef}
-              id={`waveform-${index}`}
-              className="w-1/3 ml-auto "
-            ></div>
+                      <Waveforms 
+                      filteredinfo={filteredinfo} 
+                      audioUrl={item.audio} 
+                      setIsWaveformPlaying={setIsWaveformPlaying} 
+                      id={item.id} 
+                      setWaveforms={setWaveforms}                        
+                      />
 
           <div className="flex md:p-4 ml-auto">            
                        <Icon
