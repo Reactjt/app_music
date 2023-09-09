@@ -312,8 +312,7 @@ const LoggedInContainer = ({ info, children, }) => {
       {/* Render search results */}
       {searchResults.map((result) => (
         <div key={result.id}>
-          {/* Display search results here */}
-          {/* You can format and display the results as needed */}
+       
         </div>
       ))}
       {/* Filter input */}
