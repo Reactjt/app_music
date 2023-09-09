@@ -61,22 +61,26 @@ const SingleFilterCard = ({ info}) => {
   
 
     const [waveforms, setWaveforms] = useState([]);
+    const waveformContainerRef = useRef(null);
  
     const [isWaveformPlaying, setIsWaveformPlaying] = useState(
         new Array(filteredinfo.length).fill(false)
       ); // Track play state for each waveform
-    const waveformContainerRef = useRef(null);  
+ 
     useEffect(() => {
         console.error("useEffect runn");
-        const usedIds = []; 
+        // const usedIds = []; 
       
         const initializeWaveform = (audioUrl, id) => {
           console.log("ID: " + id);
-      console.log("initilayy"+usedIds)
-          if (!usedIds.includes(id)) {
-            // Check if the ID is not already used
+          if(!waveformContainerRef.current){
+            return;
+          }
+          const element = waveformContainerRef.current;
+          console.log("eleeeeee: "+element)
+            
             const ws = WaveSurfer.create({
-              container: `#waveform-${id}`,
+              container: element,
               responsive: true,
               barWidth: 2,
               barHeight: 4,
@@ -103,13 +107,14 @@ const SingleFilterCard = ({ info}) => {
       
             setWaveforms((prevWaveforms) => [...prevWaveforms, ws]);
          
-            console.log("finally"+usedIds)
-          }
+        
+        
         };
    
-        filteredinfo.forEach((song, index) => {
+        filteredinfo.forEach((song) => {
         //    usedIds.push(index);
-          initializeWaveform(song.audio, index);
+         
+          initializeWaveform(song.audio, song.id);
         
         });
       
@@ -257,10 +262,9 @@ const threshold = 200;
             {filteredinfo.map((item, index) => (
                
                 <div 
-                    key={index}
+                    key={item.id}
                     className={`p-2 ${scrollY > threshold ? "song-fade" : ""}`}
-                     
-            
+ 
                 >
                     <div className=" hover:bg-gray-400 hover:bg-opacity-20 p-4  flex items-center  border-b-gray-200 border-b border-opacity-10"
                    >
@@ -304,7 +308,7 @@ const threshold = 200;
                          </div>
                        </div>
                        <div
-                    
+                    ref={waveformContainerRef}
               id={`waveform-${index}`}
               className="w-1/3 ml-auto "
             ></div>
