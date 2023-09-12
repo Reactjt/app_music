@@ -15,6 +15,8 @@ function App() {
     const [soundPlayed, setSoundPlayed] = useState(null);
     const [isPaused, setIsPaused] = useState(true);
     const [selectedFilter, setSelectedFilter] = useState(""); 
+    const [currentTimestamp, setCurrentTimestamp] = useState(0);
+    const [song, setSong] = useState(null);
  
  
 
@@ -30,6 +32,10 @@ function App() {
                             setSoundPlayed,
                             isPaused,
                             setIsPaused,
+                            currentTimestamp,
+                            setCurrentTimestamp,
+                            song,
+                            setSong
                         }}
                     >
                               <filteredInfoContext.Provider

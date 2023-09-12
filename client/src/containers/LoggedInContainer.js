@@ -13,6 +13,7 @@ const LoggedInContainer = ({ info, children, }) => {
   const [duration, setDuration] = useState(0);
   const [progressBarWidth, setProgressBarWidth] = useState(0);
   const [waveformid, setWaveformid] = useState("waveform-container");
+  const {currentTimestamp, setCurrentTimestamp, song} = useContext(songContext);
 
   const  {isWaveformPlaying,setIsWaveformPlaying} = useWaveformContext();
 
@@ -58,9 +59,12 @@ const LoggedInContainer = ({ info, children, }) => {
   const waveformContainerRef = useRef(null);  
 
   useEffect(() => {
-   
+    console.log("pause",isPaused)
+  })
 
-    const initializeWaveSurfer = () => {
+  useEffect(() => {
+   
+    const initializeWaveSurfer = async() => {
       if(!waveformContainerRef.current){
         return;
       }
@@ -78,6 +82,13 @@ const LoggedInContainer = ({ info, children, }) => {
           width: 50
         });
 
+        console.error(waveSurferRef.current)
+        await waveSurferRef.current.play()
+         
+// (() => {
+//   await waveSurferRef.current.play()
+// })();
+
 
         if(!waveSurferRef.current){
           return;
@@ -86,7 +97,7 @@ const LoggedInContainer = ({ info, children, }) => {
       // Calculate the new audio current time based on the waveform progress
       const newTime = progress * audioRef.current.duration;
       audioRef.current.currentTime = newTime;
-      setCurrentTime(newTime);
+      setCurrentTimestamp(newTime);
     });
 
       if (currentSong) {
@@ -98,45 +109,52 @@ const LoggedInContainer = ({ info, children, }) => {
       }
     };
  
-
-    if (document.readyState === "interactive" || document.readyState === "complete") {
-      console.log("jbnkjnk");
-      initializeWaveSurfer();
-      console.log("ijjoij");
-    } else {
-      window.addEventListener("DOMContentLoaded", initializeWaveSurfer);
-    }
+    initializeWaveSurfer();
+    // if (document.readyState === "interactive" || document.readyState === "complete") {
+    //   console.log("jbnkjnk");
+    //   initializeWaveSurfer();
+    //   console.log("ijjoij");
+    // } else {
+    //   window.addEventListener("DOMContentLoaded", initializeWaveSurfer);
+    // }
  
     return () => {
       window.removeEventListener("DOMContentLoaded", initializeWaveSurfer);
+        
     };
     
   }, [currentSong]);
 
-  
-  
-  
   useEffect(() => {
-    console.log(waveSurferRef.current)
-    if(!waveSurferRef.current){
+     if(!waveSurferRef.current)
       return;
-    }
-    console.log(waveSurferRef.current)
-     // Update the waveform when the current song changes
-     if (currentSong) {
-      // Load the audio for the current song
-      waveSurferRef.current.load(currentSong.audio);
-      console.log(waveSurferRef.current.play)
-      // Play the audio if it's not paused
+     
+      waveSurferRef.current.load(currentSong.audio)
+
+  },[song])
+  
+  
+  // useEffect(() => {
+  //   console.log(waveSurferRef.current)
+  //   if(!waveSurferRef.current){
+  //     return;
+  //   }
+  //   console.log(waveSurferRef.current)
+  //    // Update the waveform when the current song changes
+  //    if (currentSong) {
+  //     // Load the audio for the current song
+  //     waveSurferRef.current.load(currentSong.audio);
+  //     console.log(waveSurferRef.current.play)
+  //     // Play the audio if it's not paused
       
-    }  
-    // return () => {
-    //   if(!waveSurferRef.current){
-    //     return
-    //   }
-    //   waveSurferRef.current.destroy();
-    // }
-  }, [currentSong]);
+  //   }  
+  //   // return () => {
+  //   //   if(!waveSurferRef.current){
+  //   //     return
+  //   //   }
+  //   //   waveSurferRef.current.destroy();
+  //   // }
+  // }, [currentSong]);
   
   
 
@@ -161,14 +179,7 @@ const LoggedInContainer = ({ info, children, }) => {
     if (!waveSurferRef.current) {
       return;
     }
-   
-    waveSurferRef.current.on("audioprocess", () => {
-      const newTime = waveSurferRef.current.getCurrentTime();
-      setCurrentTime(newTime);
-      // Optionally, you can also update the audio element's currentTime
-      audioRef.current.currentTime = newTime;
-    });
-   
+    
     waveSurferRef.current.on("ready", () => {
       setDuration(waveSurferRef.current.getDuration());
     });
@@ -183,6 +194,18 @@ const LoggedInContainer = ({ info, children, }) => {
       //// ////waveSurferRef.current.un("finish")
     };
   }, [currentSong]);
+
+  useEffect(() => {
+    if(!waveSurferRef.current)
+    return;
+
+    waveSurferRef.current.on("audioprocess", () => {
+      const newTime = waveSurferRef.current.getCurrentTime();
+      
+      setCurrentTimestamp(newTime);
+    
+    });
+  })
 
   useEffect(() => {
     if(!waveSurferRef.current){
@@ -220,7 +243,7 @@ const LoggedInContainer = ({ info, children, }) => {
     }
          waveSurferRef.current.pause();
  
-    setIsPaused(true);
+    // setIsPaused(true);
   };
   
   const togglePlayPause = () => {
@@ -377,7 +400,7 @@ const LoggedInContainer = ({ info, children, }) => {
                     onClick={playNextSong}
                   />
                   <div className="hidden md:block md:ml-8 md:text-xl text-gray-400">
-                    {formatTime(currentTime)} / {formatTime(duration)}
+                    {formatTime(currentTimestamp)} / {formatTime(duration)}
                   </div>
                 </div>
               </div>

@@ -17,7 +17,8 @@ const SingleFilterCard = ({ info}) => {
     const audioRef = React.useRef(null);
  
     const { selectedFilter, setSelectedFilter } = useContext(filteredInfoContext);
-    const {isPaused, setIsPaused} = useContext(songContext);
+ 
+    const {isPaused, setIsPaused, currentSong, setCurrentSong, song, setSong} = useContext(songContext);
     const [progress, setProgress] = useState(0); // Current progress in seconds
     const [isPlaying, setIsPlaying] = useState(false); // Song playing status
     const [currentTime, setCurrentTime] = useState(0);
@@ -58,10 +59,7 @@ const SingleFilterCard = ({ info}) => {
      ? songs.filter(song => song.flt_name.includes(selectedFilter))
      : songs;
 //   console.log(filteredinfo)
-     
-    const { currentSong, setCurrentSong } = useContext(songContext);
-  
-
+    
     const [waveforms, setWaveforms] = useState({});
     const waveformContainerRef = useRef(null);
  
@@ -116,12 +114,15 @@ const SingleFilterCard = ({ info}) => {
           if (isWaveformPlaying) {
             waveform.pause();
             setIsWaveformPlaying(null);
-            setIsPaused(true)
+            // setIsPaused(true)
+            // setIsPlaying(false)
           } else {
             console.error(waveform)
             waveform.play();
-            setIsPaused(false)
+            // setIsPaused(false)
             setIsWaveformPlaying(id);
+            setSong(id)
+            // setIsPlaying(true);
           }
         }
 
@@ -129,9 +130,9 @@ const SingleFilterCard = ({ info}) => {
         // Find the clicked song from the records array
         const clickedSong = filteredinfo.find((song) => song.audio === audioUrl);
     
-        if (!clickedSong) {
-            return; // Return early if the clicked song is not found
-        }
+        // if (!clickedSong) {
+        //     return; // Return early if the clicked song is not found
+        // }
     
         if (currentSong && currentSong.sound && currentSong.audio === audioUrl) {
             // Pause the audio if _it's the same song that is already playing
@@ -146,17 +147,7 @@ const SingleFilterCard = ({ info}) => {
                     console.log("error");
                 }
             }
-    
-
-            function updateProgress() {
-                if (sound && isPlaying) {
-                    const newProgress = sound.seek();
-                    setProgress(newProgress);
-                    requestAnimationFrame(updateProgress);
-                }
-            }
-
-            // Create a new Howl instance for the selected song
+          // Create a new Howl instance for the selected song
           
     const sound = new Howl({
         src: [audioUrl],
@@ -164,7 +155,7 @@ const SingleFilterCard = ({ info}) => {
         onplay: () => {
             setIsPlaying(true);
             console.log("filter onplay")
-            requestAnimationFrame(updateProgress);
+        
         },
         onpause: () => {
             setIsPlaying(false);
@@ -176,7 +167,7 @@ const SingleFilterCard = ({ info}) => {
                 
             }));
             setIsPlaying(false);
-            setProgress(0);
+          
         },});
 
             
@@ -279,7 +270,8 @@ const threshold = 200;
           
                          </div>
                        </div>
-                      <Waveforms   
+                      <Waveforms 
+                      song = {song}  
                       filteredinfo={filteredinfo} 
                       audioUrl={item.audio} 
                       setIsWaveformPlaying={setIsWaveformPlaying} 
