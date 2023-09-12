@@ -5,7 +5,7 @@ import { useContext, useRef, useState, useEffect } from "react";
 import React from 'react'
 import { useWaveformContext } from "../../contexts/WaveformContext";
 
-export default function Waveforms({filteredinfo, audioUrl, id, setWaveforms}) {
+export default function Waveforms({filteredinfo, audioUrl,  id, setWaveforms}) {
  
  
 const waveformContainerRef = useRef(null);
@@ -13,18 +13,18 @@ const  {isWaveformPlaying,setIsWaveformPlaying} = useWaveformContext();
  
  
  console.log(isWaveformPlaying)
- console.log(setIsWaveformPlaying)
+//  console.log(setIsWaveformPlaying)
   
  
 
 useEffect(() => {
-   
+   console.error("useeffectrun")
       if(!waveformContainerRef.current){
         return;
       }
       const element = waveformContainerRef.current;
- 
-        
+      console.error("first")
+     
         const ws = WaveSurfer.create({
           container: element,
           responsive: true,
@@ -38,20 +38,19 @@ useEffect(() => {
         });
   
         ws.load(audioUrl);
-  
+       
         ws.on("play", () => {
-          setIsWaveformPlaying((prev) =>
-            prev.map((value, index) => (index === id ? true : value))
-          );
+         console.log("playyy")    
+          setIsWaveformPlaying(id)
         });
-  
+      
         ws.on("pause", () => {
-          setIsWaveformPlaying((prev) =>
-            prev.map((value, index) => (index === id ? false : value))
-          );
+          setIsWaveformPlaying(null) 
         });
-  
-        setWaveforms((prevWaveforms) => [...prevWaveforms, ws]);
+ 
+        // console.error("nkml")
+//   console.log(setIsWaveformPlaying)
+        setWaveforms((prevWaveforms) => ({...prevWaveforms, [id]: ws }));
   
     return () => {
      
