@@ -60,8 +60,7 @@ const LoggedInContainer = ({ info, children, }) => {
       if(!waveformContainerRef.current){
         return;
       }
-      // console.log("Container element:", waveformContainerRef.current);  
-      // console.log("Container element:", waveformContainerRef.current.id);  
+ 
       const id = waveformContainerRef.current.id;
       console.log(id)
       console.log(waveSurferRef.current)
@@ -127,6 +126,12 @@ const LoggedInContainer = ({ info, children, }) => {
       // Play the audio if it's not paused
       
     }  
+    // return () => {
+    //   if(!waveSurferRef.current){
+    //     return
+    //   }
+    //   waveSurferRef.current.destroy();
+    // }
   }, [currentSong]);
   
   

@@ -9,7 +9,7 @@ export function useWaveformContext() {
 
  
 export function WaveformProvider({ children }) {
-  const [isWaveformPlaying, setIsWaveformPlaying] = useState(new Array(300).fill(false));
+  const [isWaveformPlaying, setIsWaveformPlaying] = useState();
  
   return (
     <WaveformContext.Provider value={{isWaveformPlaying,setIsWaveformPlaying}}>

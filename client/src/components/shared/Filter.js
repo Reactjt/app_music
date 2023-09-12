@@ -62,33 +62,37 @@ const SingleFilterCard = ({ info}) => {
     const { currentSong, setCurrentSong } = useContext(songContext);
   
 
-    const [waveforms, setWaveforms] = useState([]);
+    const [waveforms, setWaveforms] = useState({});
     const waveformContainerRef = useRef(null);
  
      const  {isWaveformPlaying,setIsWaveformPlaying} = useWaveformContext();
       
-      console.log(isWaveformPlaying)
-      console.log(setIsWaveformPlaying)
+    //   console.log(isWaveformPlaying)
+    //   console.log(setIsWaveformPlaying)
      
       
-      const playySong = (index) => {
+      const playySong = (id) => {
         if(!waveforms){
             return;
         }
-      
+     console.error(id)
        console.log("waveformmms",waveforms)
-        const waveform = waveforms[index];
-        
+        const waveform = waveforms[id];
+       console.log("waveform",waveform)
    if(!waveform){
     return;
    }
-   console.log("waveformmmmmmmmmm:"+waveform)
+   console.error("waveformmmmmmm")
+ 
         if (waveform) {
-            console.error(waveform)
-          if (isWaveformPlaying[index]) {
+ 
+          if (isWaveformPlaying) {
             waveform.pause();
+            setIsWaveformPlaying(null);
           } else {
+            console.error(waveform)
             waveform.play();
+            setIsWaveformPlaying(id);
           }
         }
       };
@@ -207,7 +211,7 @@ const threshold = 200;
 
     return (
         <div>
-            {filteredinfo.map((item) => (
+            {filteredinfo.map((item,index) => (
                
                 <div 
                     key={item.id}
@@ -225,7 +229,7 @@ const threshold = 200;
                   onClick={() => playySong(item.id)}
                   className="mx-2 sm:mx-4 sm:h-5 sm:w-5 hover:cursor-pointer"
                 >
-                  {isWaveformPlaying[item.id] ? "Pause" : "Play"}
+                  {isWaveformPlaying === item.id ? "Pause" : "Play"}
                 </button>
  
                        
