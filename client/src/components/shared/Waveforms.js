@@ -4,19 +4,22 @@ import { useContext, useRef, useState, useEffect } from "react";
 
 import React from 'react'
 import { useWaveformContext } from "../../contexts/WaveformContext";
+import songContext from "../../contexts/songContext";
 
-export default function Waveforms({filteredinfo, audioUrl,  id, setWaveforms}) {
+export default function Waveforms({filteredinfo, audioUrl,  id, setWaveforms, song}) {
  
  
 const waveformContainerRef = useRef(null);
 const  {isWaveformPlaying,setIsWaveformPlaying} = useWaveformContext();
+const {isPaused, setIsPaused} = useContext(songContext)
+ const {currentTimestamp, setCurrentTimestamp, currentSong} = useContext(songContext);
  
-const [currentTime, setCurrentTime] = useState(0);
 const [duration, setDuration] = useState(0);
- console.log(isWaveformPlaying)
+//  console.log(isWaveformPlaying)
 //  console.log(setIsWaveformPlaying)
   
  
+let ws;
 
 useEffect(() => {
    console.error("useeffectrun")
@@ -27,7 +30,7 @@ useEffect(() => {
       element.style.overflow = "hidden";
       console.error("first")
      
-        const ws = WaveSurfer.create({
+        ws = WaveSurfer.create({
           container: element,
           responsive: true,
           barWidth: 1,
@@ -43,10 +46,12 @@ useEffect(() => {
         ws.on("play", () => {
          console.log("playyy")    
           setIsWaveformPlaying(id)
+          setIsPaused(false)
         });
       
         ws.on("pause", () => {
           setIsWaveformPlaying(null) 
+          setIsPaused(true)
         });
  
 
@@ -55,11 +60,7 @@ useEffect(() => {
       return;
     }
    
-    ws.on("audioprocess", () => {
-      const newTime = ws.getCurrentTime();
-      setCurrentTime(newTime);
- 
-    });
+
    
     ws.on("ready", () => {
       setDuration(ws.getDuration());
@@ -76,8 +77,23 @@ useEffect(() => {
         ws.destroy();
         ws.un("audioprocess");
     };
-  }, [waveformContainerRef]);
+  }, [waveformContainerRef]); 
 
+  useEffect(() =>{
+   if(!ws){
+    return;
+   }
+
+   ws.on("audioprocess", () => {
+    const newTime = ws.getCurrentTime();
+    
+      console.log("timestamp")
+    setCurrentTimestamp(newTime);
+  
+
+  });
+  
+  },[song, currentTimestamp])
  
   function formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
@@ -88,7 +104,8 @@ useEffect(() => {
   return (
     <>
     <div className="hidden md:block md:ml-auto w-1/10 text-gray-400">
-    {formatTime(currentTime)}/{formatTime(duration)}
+    {song === id ? `${formatTime(currentTimestamp)}/${formatTime(duration)}` : `0:00/${formatTime(duration)}` }
+
   </div>
     <div
     className="hidden md:block w-3/10  overflow-x-hidden"
