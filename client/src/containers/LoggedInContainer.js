@@ -6,6 +6,7 @@ import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import Sidebar from "../components/Sidebar";
 import WaveSurfer from "wavesurfer.js"; 
+import { useWaveformContext } from "../contexts/WaveformContext";
 
 const LoggedInContainer = ({ info, children, }) => {
   const [currentTime, setCurrentTime] = useState(0);
@@ -13,10 +14,13 @@ const LoggedInContainer = ({ info, children, }) => {
   const [progressBarWidth, setProgressBarWidth] = useState(0);
   const [waveformid, setWaveformid] = useState("waveform-container");
 
+  const  {isWaveformPlaying,setIsWaveformPlaying} = useWaveformContext();
+
   const mySongs = [...info];
 
   const [showSearch, setShowSearch] = useState(false);
   const [volume, setVolume] = useState(100);
+  
 
   const [isExpanded, setIsExpanded] = useState(false);
   const handleLogoClick = () => {
@@ -194,7 +198,7 @@ const LoggedInContainer = ({ info, children, }) => {
 
  
    useEffect(() => {
-    if (!currentSong && info.length > 0) {
+    if (!currentSong ) {
       setCurrentSong(firstsong);
       setIsPaused(true)
     }
@@ -326,7 +330,7 @@ const LoggedInContainer = ({ info, children, }) => {
           {/* This first div will be the left panel */}
           <Sidebar info={info} />
           {/* This second div will be the right part(main content) */}
-          <div className=" md:h-full md:w-4/5  bg-zinc-900 text-white  overflow-auto  md:ml-auto">
+          <div className=" md:h-full md:w-11/10  bg-zinc-900 text-white  overflow-auto  md:ml-auto">
             <div
               className={` md:p-4 pt-0  overflow-auto ${
                 isExpanded
@@ -348,7 +352,7 @@ const LoggedInContainer = ({ info, children, }) => {
                 alt="currentSongThumbail"
                 className="h-16 w-16 sm:h-20 sm:w-20 mr-6 object-cover sm:mx-10 rounded"
               />
-              <div className="w-1/2 flex justify-center h-full flex-col items-left sm:mx-10">
+              <div className="w-1/2 flex justify-center h-full flex-col items-left sm:ml-10">
                 <div className="flex items-center">
                   {/* controls for the playing song go here */}
                   <Icon
@@ -372,27 +376,27 @@ const LoggedInContainer = ({ info, children, }) => {
                     className="cursor-pointer   text-white mx-2 sm:mx-4"
                     onClick={playNextSong}
                   />
-                  <div className="hidden md:block md:ml-16">
-                    {formatTime(currentTime)}/{formatTime(duration)}
+                  <div className="hidden md:block md:ml-8 md:text-xl text-gray-400">
+                    {formatTime(currentTime)} / {formatTime(duration)}
                   </div>
                 </div>
               </div>
 
               <div className="w-1/2 mb-1">
-                <div className="hidden md:block text-sm  cursor-pointer text-white">
+                <div className="hidden md:block text-md  cursor-pointer text-white">
                   {currentSong.name}
                 </div>
 
-                <div className="hidden md:block text-xs text-gray-500   cursor-pointer">
+                <div className="hidden md:block  text-gray-500   cursor-pointer">
                   {currentSong.artis_name}
                 </div>
               </div>
             </div>
             {/* progress bar */}
-             <div ref={waveformContainerRef} id="waveform-container" className="w-1/2 mb-8" ></div>
+             <div ref={waveformContainerRef} id="waveform-container" className="w-9/10 mb-8" ></div>
         
 
-            <div className="flex mb-8">
+            <div className="flex mb-8 ml-12">
               <Icon
                 icon="ri:download-line"
                 color="white"
@@ -407,7 +411,7 @@ const LoggedInContainer = ({ info, children, }) => {
             </div>
 
             {/* Volume Slider */}
-            <div className="hidden md:flex items-center mb-8">
+            <div className="hidden md:flex items-center mb-8 mx-10">
               <Icon icon="subway:sound" color="white" />
               <input
   type="range"
