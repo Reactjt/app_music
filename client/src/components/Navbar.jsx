@@ -13,7 +13,7 @@ export default function Navbar({onLogoClick}) {
   
 
   return (
-    <nav className="  bg-zinc-800   shadow-md ">
+    <nav className="  bg-zinc-800   shadow-md top-0 ">
       <div className="container mx-auto px-4 py-2 md:flex md:justify-between md:items-center">
         <div className="flex items-center justify-between">
           <a href="#" className="flex text-lg font-semibold text-white mx-10">

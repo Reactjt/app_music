@@ -71,7 +71,34 @@ const SingleFilterCard = ({ info}) => {
     //   console.log(setIsWaveformPlaying)
      
       
-      const playySong = (id) => {
+//       const playySong = (id) => {
+//         if(!waveforms){
+//             return;
+//         }
+//      console.error(id)
+//        console.log("waveformmms",waveforms)
+//         const waveform = waveforms[id];
+//        console.log("waveform",waveform)
+//    if(!waveform){
+//     return;
+//    }
+//    console.error("waveformmmmmmm")
+ 
+//         if (waveform) {
+ 
+//           if (isWaveformPlaying) {
+//             waveform.pause();
+//             setIsWaveformPlaying(null);
+//           } else {
+//             console.error(waveform)
+//             waveform.play();
+//             setIsWaveformPlaying(id);
+//           }
+//         }
+//       };
+ 
+    const playSong = (audioUrl,id) => {
+ 
         if(!waveforms){
             return;
         }
@@ -89,26 +116,16 @@ const SingleFilterCard = ({ info}) => {
           if (isWaveformPlaying) {
             waveform.pause();
             setIsWaveformPlaying(null);
+            setIsPaused(true)
           } else {
             console.error(waveform)
             waveform.play();
+            setIsPaused(false)
             setIsWaveformPlaying(id);
           }
         }
-      };
- 
-    const playSong = (audioUrl,id) => {
- 
-        // if (isWaveformPlaying[id]) {
-        //     waveforms[id].pause();
-        //   } else {
-        //     waveforms.forEach((ws, index) => {
-        //       if (index !== id) {
-        //         ws.pause();
-        //       }
-        //     });
-        //     waveforms[id].play();
-        //   }
+
+
         // Find the clicked song from the records array
         const clickedSong = filteredinfo.find((song) => song.audio === audioUrl);
     
@@ -222,17 +239,11 @@ const threshold = 200;
                    >
                     <div className="flex items-center"
                              onClick={() => {
-                        playSong(item.audio);
+                        playSong(item.audio,item.id);
  
                     }}>
-                                <button
-                  onClick={() => playySong(item.id)}
-                  className="mx-2 sm:mx-4 sm:h-5 sm:w-5 hover:cursor-pointer"
-                >
-                  {isWaveformPlaying === item.id ? "Pause" : "Play"}
-                </button>
- 
-                       
+                   
+                 
                             <img
                                 src={item.thumb}
                                 alt=""
@@ -240,6 +251,15 @@ const threshold = 200;
                             />
                         
                         <div className="mx-6 md:ml-6">
+                        <Icon
+                    icon={
+                      isWaveformPlaying === item.id
+                        ? "solar:pause-bold"
+                        : "solar:play-bold"
+                    }
+                    className="cursor-pointer w-6 h-6 text-white"
+                    
+                  />
                          </div>
                         <div>
                         
@@ -259,7 +279,7 @@ const threshold = 200;
           
                          </div>
                        </div>
-                      <Waveforms 
+                      <Waveforms   
                       filteredinfo={filteredinfo} 
                       audioUrl={item.audio} 
                       setIsWaveformPlaying={setIsWaveformPlaying} 
@@ -267,7 +287,7 @@ const threshold = 200;
                       setWaveforms={setWaveforms}                        
                       />
 
-          <div className="flex md:p-4 ml-auto">            
+          <div className="  flex md:flex  sm:w-1/10  md:p-1 md:ml-10">            
                        <Icon
                         icon="ri:download-line" 
                         color="white" 
