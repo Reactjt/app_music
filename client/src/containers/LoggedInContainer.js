@@ -5,7 +5,7 @@ import songContext from "../contexts/songContext";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import Sidebar from "../components/Sidebar";
-import WaveSurfer from "wavesurfer.js"; 
+import WaveSurfer from "wavesurfer.js";
 import { useWaveformContext } from "../contexts/WaveformContext";
 
 const LoggedInContainer = ({ info, children, }) => {
@@ -21,7 +21,7 @@ const LoggedInContainer = ({ info, children, }) => {
 
   const [showSearch, setShowSearch] = useState(false);
   const [volume, setVolume] = useState(100);
-  
+
 
   const [isExpanded, setIsExpanded] = useState(false);
   const handleLogoClick = () => {
@@ -53,22 +53,19 @@ const LoggedInContainer = ({ info, children, }) => {
 
   const records = mySongs;
   const firstsong = info[0];
- 
+
 
   const waveSurferRef = useRef(null);
-  const waveformContainerRef = useRef(null);  
+  const waveformContainerRef = useRef(null);
+
 
   useEffect(() => {
-    console.log("pause",isPaused)
-  })
 
-  useEffect(() => {
-   
     const initializeWaveSurfer = async() => {
       if(!waveformContainerRef.current){
         return;
       }
- 
+
       const id = waveformContainerRef.current.id;
       console.log(id)
       console.log(waveSurferRef.current)
@@ -83,8 +80,9 @@ const LoggedInContainer = ({ info, children, }) => {
         });
 
         console.error(waveSurferRef.current)
+        waveSurferRef.current.setVolume( 0 )
         await waveSurferRef.current.play()
-         
+
 // (() => {
 //   await waveSurferRef.current.play()
 // })();
@@ -93,12 +91,12 @@ const LoggedInContainer = ({ info, children, }) => {
         if(!waveSurferRef.current){
           return;
         }
-           waveSurferRef.current.on("seek", (progress) => {
-      // Calculate the new audio current time based on the waveform progress
-      const newTime = progress * audioRef.current.duration;
-      audioRef.current.currentTime = newTime;
-      setCurrentTimestamp(newTime);
-    });
+    //        wavesurferref.current.on("seek", (progress) => {
+    //   // calculate the new audio current time based on the waveform progress
+    //   const newtime = progress * audioref.current.duration;
+    //   audioref.current.currenttime = newtime;
+    //   setcurrenttimestamp(newtime);
+    // });
 
       if (currentSong) {
       audioRef.current.src = currentSong.audio;
@@ -108,7 +106,7 @@ const LoggedInContainer = ({ info, children, }) => {
     }
       }
     };
- 
+
     initializeWaveSurfer();
     // if (document.readyState === "interactive" || document.readyState === "complete") {
     //   console.log("jbnkjnk");
@@ -117,23 +115,26 @@ const LoggedInContainer = ({ info, children, }) => {
     // } else {
     //   window.addEventListener("DOMContentLoaded", initializeWaveSurfer);
     // }
- 
+
     return () => {
       window.removeEventListener("DOMContentLoaded", initializeWaveSurfer);
-        
+
     };
-    
+
   }, [currentSong]);
 
   useEffect(() => {
-     if(!waveSurferRef.current)
+     if(!waveSurferRef.current || currentSong.audio )
       return;
-     
-      waveSurferRef.current.load(currentSong.audio)
 
-  },[song])
-  
-  
+      waveSurferRef.current.load(currentSong.audio)
+      return () => {
+         waveSurferRef.current.destroy()
+      }
+
+  },[currentSong])
+
+
   // useEffect(() => {
   //   console.log(waveSurferRef.current)
   //   if(!waveSurferRef.current){
@@ -146,8 +147,8 @@ const LoggedInContainer = ({ info, children, }) => {
   //     waveSurferRef.current.load(currentSong.audio);
   //     console.log(waveSurferRef.current.play)
   //     // Play the audio if it's not paused
-      
-  //   }  
+
+  //   }
   //   // return () => {
   //   //   if(!waveSurferRef.current){
   //   //     return
@@ -155,8 +156,8 @@ const LoggedInContainer = ({ info, children, }) => {
   //   //   waveSurferRef.current.destroy();
   //   // }
   // }, [currentSong]);
-  
-  
+
+
 
 
 
@@ -170,16 +171,16 @@ const LoggedInContainer = ({ info, children, }) => {
   const songUrl = currentSong ? currentSong.audio : "";
   const audioRef = useRef(new Audio()); // ////Create an audio element using useRef
 
-  
- 
- 
+
+
+
 
   useEffect(() => {
-    
+
     if (!waveSurferRef.current) {
       return;
     }
-    
+
     waveSurferRef.current.on("ready", () => {
       setDuration(waveSurferRef.current.getDuration());
     });
@@ -187,7 +188,7 @@ const LoggedInContainer = ({ info, children, }) => {
     // waveSurferRef.current.on("finish", () => {
     //   playNextSong();
     // });
- 
+
 
     return () => {
       waveSurferRef.current.un("audioprocess");
@@ -201,9 +202,9 @@ const LoggedInContainer = ({ info, children, }) => {
 
     waveSurferRef.current.on("audioprocess", () => {
       const newTime = waveSurferRef.current.getCurrentTime();
-      
+
       setCurrentTimestamp(newTime);
-    
+
     });
   })
 
@@ -212,14 +213,22 @@ const LoggedInContainer = ({ info, children, }) => {
       return;
     }
     console.log(waveSurferRef);
-    if (currentSong ) {
-      pauseSound();
-    
-    }  
-  }, [currentSong]);
-  
+    // if (currentSong ) {
+    //   pauseSound();
 
- 
+    // }
+  }, [currentSong]);
+
+   useEffect(() => {
+      if(!waveSurferRef.current) return
+      waveSurferRef.current.on("audioprocess", () => {
+      const newTime = waveSurferRef.current.getCurrentTime();
+      setCurrentTimestamp(newTime);
+   });
+  }, [currentTimestamp, song])
+
+
+
    useEffect(() => {
     if (!currentSong ) {
       setCurrentSong(firstsong);
@@ -232,31 +241,44 @@ const LoggedInContainer = ({ info, children, }) => {
     if(!waveSurferRef.current){
       return;
     }
-         waveSurferRef.current.play();
-  
-    setIsPaused(false);
+      // (100 * 10) / 180
+      const currentSongPercentage = ( currentTimestamp ) / waveSurferRef.current.getDuration();
+      // console.log( waveSurferRef.current.getMediaElement() )
+      if( currentSongPercentage > 0 ) waveSurferRef.current.seekTo( currentSongPercentage );
+      waveSurferRef.current.play();
+
+      setIsPaused(false);
   };
 
   const pauseSound = () => {
     if (!waveSurferRef.current) {
       return;
     }
-         waveSurferRef.current.pause();
- 
-    // setIsPaused(true);
+      waveSurferRef.current.pause();
+
+      setIsPaused(true);
   };
-  
+
   const togglePlayPause = () => {
-    if (isPaused) {
+    if( isPaused )  {
       playSound();
     } else {
       pauseSound();
     }
   };
 
-  
+   useEffect(() => {
+    // console.log("pause",isPaused)
+      if(!waveSurferRef.current) return
+      // togglePlayPause()
+      console.log( "play + pause", isPaused)
+      if( isPaused ) {
+         waveSurferRef.current.pause()
+      } else {
+         waveSurferRef.current.play()
+      }
+  }, [isPaused, song])
 
- 
   const playNextSong = () => {
     if (!currentSong || !currentSong.audio) {
       console.log("Error: Missing current song");
@@ -273,6 +295,7 @@ const LoggedInContainer = ({ info, children, }) => {
       return;
     }
 
+      console.log( info )
     const currentIndex = info.findIndex(
       (song) => song.audio === currentSong.audio
     );
@@ -331,11 +354,11 @@ const LoggedInContainer = ({ info, children, }) => {
     link.click();
   };
 
- 
+
 
   return (
     <div className="h-full w-full bg-zinc-900  ">
-       
+
       <Navbar onLogoClick={handleLogoClick} /> {/* Pass onLogoClick prop */}
       {/* Add the SearchBar component */}
       <div className="py-6 flex justify-center ">
@@ -344,7 +367,7 @@ const LoggedInContainer = ({ info, children, }) => {
       {/* Render search results */}
       {searchResults.map((result) => (
         <div key={result.id}>
-       
+
         </div>
       ))}
       {/* Filter input */}
@@ -366,7 +389,7 @@ const LoggedInContainer = ({ info, children, }) => {
           </div>
         </div>
         {/* This div is the current playing song */}
-       
+
         {currentSong && (
           <div className="w-full h-1/10 py-8 sm:py-5 justify-center align-middle   bg-zinc-900  text-white flex items-center px-4 fixed bottom-0">
             <div className="w-full flex items-center mb-8">
@@ -417,7 +440,7 @@ const LoggedInContainer = ({ info, children, }) => {
             </div>
             {/* progress bar */}
              <div ref={waveformContainerRef} id="waveform-container" className="w-9/10 mb-8" ></div>
-        
+
 
             <div className="flex mb-8 ml-12">
               <Icon
@@ -445,12 +468,12 @@ const LoggedInContainer = ({ info, children, }) => {
   onChange={(e) => {
     const newVolume = parseInt(e.target.value);
     setVolume(newVolume);
-    
+
     // //Update the volume for WaveSurfer
     if (waveSurferRef.current) {
       waveSurferRef.current.setVolume(newVolume / 100);
     }
-    
+
   }}
   className="w-24"
 />
