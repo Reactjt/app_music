@@ -78,25 +78,15 @@ const LoggedInContainer = ({ info, children, }) => {
           height: 60,
           width: 50
         });
-
+        
         console.error(waveSurferRef.current)
         waveSurferRef.current.setVolume( 0 )
         await waveSurferRef.current.play()
-
-// (() => {
-//   await waveSurferRef.current.play()
-// })();
-
-
+ 
         if(!waveSurferRef.current){
           return;
         }
-    //        wavesurferref.current.on("seek", (progress) => {
-    //   // calculate the new audio current time based on the waveform progress
-    //   const newtime = progress * audioref.current.duration;
-    //   audioref.current.currenttime = newtime;
-    //   setcurrenttimestamp(newtime);
-    // });
+       
 
       if (currentSong) {
       audioRef.current.src = currentSong.audio;
@@ -108,14 +98,7 @@ const LoggedInContainer = ({ info, children, }) => {
     };
 
     initializeWaveSurfer();
-    // if (document.readyState === "interactive" || document.readyState === "complete") {
-    //   console.log("jbnkjnk");
-    //   initializeWaveSurfer();
-    //   console.log("ijjoij");
-    // } else {
-    //   window.addEventListener("DOMContentLoaded", initializeWaveSurfer);
-    // }
-
+ 
     return () => {
       window.removeEventListener("DOMContentLoaded", initializeWaveSurfer);
 
@@ -133,35 +116,9 @@ const LoggedInContainer = ({ info, children, }) => {
       }
 
   },[currentSong])
+ 
 
-
-  // useEffect(() => {
-  //   console.log(waveSurferRef.current)
-  //   if(!waveSurferRef.current){
-  //     return;
-  //   }
-  //   console.log(waveSurferRef.current)
-  //    // Update the waveform when the current song changes
-  //    if (currentSong) {
-  //     // Load the audio for the current song
-  //     waveSurferRef.current.load(currentSong.audio);
-  //     console.log(waveSurferRef.current.play)
-  //     // Play the audio if it's not paused
-
-  //   }
-  //   // return () => {
-  //   //   if(!waveSurferRef.current){
-  //   //     return
-  //   //   }
-  //   //   waveSurferRef.current.destroy();
-  //   // }
-  // }, [currentSong]);
-
-
-
-
-
-
+ 
   const [filterName, setFilterName] = useState("");
 
   const filteredRecords = records.filter((record) => {
@@ -279,6 +236,11 @@ const LoggedInContainer = ({ info, children, }) => {
       }
   }, [isPaused, song])
 
+  console.log(info)
+  var s = info[0];
+ 
+ console.log(s)
+
   const playNextSong = () => {
     if (!currentSong || !currentSong.audio) {
       console.log("Error: Missing current song");
@@ -299,6 +261,8 @@ const LoggedInContainer = ({ info, children, }) => {
     const currentIndex = info.findIndex(
       (song) => song.audio === currentSong.audio
     );
+
+    
     if (currentIndex === -1) {
       console.log("Error: Current song not found in records");
       return;

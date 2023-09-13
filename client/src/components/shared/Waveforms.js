@@ -78,7 +78,7 @@ useEffect(() => {
    if(!ws){
     return;
    }
-
+ 
    ws.on("audioprocess", () => {
     const newTime = ws.getCurrentTime();
 
