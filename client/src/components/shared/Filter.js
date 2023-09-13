@@ -58,73 +58,46 @@ const SingleFilterCard = ({ info}) => {
    const filteredinfo = selectedFilter
      ? songs.filter(song => song.flt_name.includes(selectedFilter))
      : songs;
-//   console.log(filteredinfo)
+ 
 
     const [waveforms, setWaveforms] = useState({});
     const waveformContainerRef = useRef(null);
 
      const  {isWaveformPlaying,setIsWaveformPlaying} = useWaveformContext();
+     const [currentPlayingSongId, setCurrentPlayingSongId] = useState(null);
 
-    //   console.log(isWaveformPlaying)
-    //   console.log(setIsWaveformPlaying)
-
-
-//       const playySong = (id) => {
-//         if(!waveforms){
-//             return;
-//         }
-//      console.error(id)
-//        console.log("waveformmms",waveforms)
-//         const waveform = waveforms[id];
-//        console.log("waveform",waveform)
-//    if(!waveform){
-//     return;
-//    }
-//    console.error("waveformmmmmmm")
-
-//         if (waveform) {
-
-//           if (isWaveformPlaying) {
-//             waveform.pause();
-//             setIsWaveformPlaying(null);
-//           } else {
-//             console.error(waveform)
-//             waveform.play();
-//             setIsWaveformPlaying(id);
-//           }
-//         }
-//       };
-
-    const playSong = (audioUrl,id) => {
-
-        if(!waveforms){
-            return;
+     const playSong = (audioUrl, id) => {
+        if (!waveforms) {
+          return;
         }
-     console.error(id)
-       console.log("waveformmms",waveforms)
+      
+        if (currentPlayingSongId !== null) {
+            const previouslyPlayingWaveform = waveforms[currentPlayingSongId];
+            if (previouslyPlayingWaveform) {
+              previouslyPlayingWaveform.pause();
+            }
+          }
+          setCurrentPlayingSongId(isWaveformPlaying === id ? null : id);
+          
         const waveform = waveforms[id];
-       console.log("waveform",waveform)
-   if(!waveform){
-    return;
-   }
-   console.error("waveformmmmmmm")
-
+      
+        if (!waveform) {
+          return;
+        }
+      
         if (waveform) {
-
-          if (isWaveformPlaying) {
+          if (isWaveformPlaying === id) {
+            // If the same song is clicked again, pause it
             waveform.pause();
             setIsWaveformPlaying(null);
-            // setIsPaused(true)
-            // setIsPlaying(false)
           } else {
-            console.error(waveform)
             waveform.play();
-            // setIsPaused(false)
             setIsWaveformPlaying(id);
-            setSong(id)
-            // setIsPlaying(true);
+            setSong(id);
           }
         }
+      
+      
 
 
         // Find the clicked song from the records array
@@ -280,7 +253,7 @@ const threshold = 200;
                       setWaveforms={setWaveforms}
                       />
 
-          <div className="  flex md:flex  sm:w-1/10  md:p-1 md:ml-10">
+          <div className=" flex md:flex  sm:w-1/10  md:p-1 md:ml-10">
                        <Icon
                         icon="ri:download-line"
                         color="white"
