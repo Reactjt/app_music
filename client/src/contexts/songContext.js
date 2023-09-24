@@ -12,7 +12,11 @@ const songContext = createContext({
     waveformid: "waveform-container",
     setWaveformid: () => {},
     currentTimestamp: 0,
-    setCurrentTimestamp: () => {}
+    setCurrentTimestamp: () => {},
+    waveforms: {},
+    setWaveforms: () => {},
+    currentVolume: 0.5,
+    setCurrentVolume: () => {}
 });
 
 export default songContext;

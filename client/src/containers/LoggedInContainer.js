@@ -1,4 +1,3 @@
- 
 import React, { useContext, useEffect, useRef, useState } from "react";
 import { Icon } from "@iconify/react";
 import songContext from "../contexts/songContext";
@@ -13,8 +12,9 @@ const LoggedInContainer = ({ info, children, }) => {
   const [duration, setDuration] = useState(0);
   const [progressBarWidth, setProgressBarWidth] = useState(0);
   const [waveformid, setWaveformid] = useState("waveform-container");
-  const {currentTimestamp, setCurrentTimestamp, song} = useContext(songContext);
+  const {currentTimestamp, setCurrentTimestamp, song, setWaveforms, waveforms, setCurrentVolume, currentVolume} = useContext(songContext);
 
+   let volumeDebounce = '';
   const  {isWaveformPlaying,setIsWaveformPlaying} = useWaveformContext();
 
   const mySongs = [...info];
@@ -49,6 +49,7 @@ const LoggedInContainer = ({ info, children, }) => {
     setSoundPlayed,
     isPaused,
     setIsPaused,
+    setSong
   } = useContext(songContext);
 
   const records = mySongs;
@@ -78,15 +79,23 @@ const LoggedInContainer = ({ info, children, }) => {
           height: 60,
           width: 50
         });
-        
+         waveSurferRef.current.on( 'timeupdate', function( time ) {
+            console.log( time );
+         })
         console.error(waveSurferRef.current)
         waveSurferRef.current.setVolume( 0 )
-        await waveSurferRef.current.play()
- 
+         await waveSurferRef.current.play();
+
+         waveSurferRef.current.on( 'interaction', ( e ) => {
+            // console.log( e, waveSurferRef.current.getCurrentTime(), waveSurferRef.current.seekTo );
+            setCurrentTimestamp( waveSurferRef.current.getCurrentTime() )
+         })
+
+
         if(!waveSurferRef.current){
           return;
         }
-       
+
 
       if (currentSong) {
       audioRef.current.src = currentSong.audio;
@@ -98,10 +107,10 @@ const LoggedInContainer = ({ info, children, }) => {
     };
 
     initializeWaveSurfer();
- 
-    return () => {
-      window.removeEventListener("DOMContentLoaded", initializeWaveSurfer);
 
+    return () => {
+      // if( waveSurferRef.current )  waveSurferRef.current.destroy()
+      window.removeEventListener("DOMContentLoaded", initializeWaveSurfer);
     };
 
   }, [currentSong]);
@@ -116,9 +125,8 @@ const LoggedInContainer = ({ info, children, }) => {
       }
 
   },[currentSong])
- 
 
- 
+
   const [filterName, setFilterName] = useState("");
 
   const filteredRecords = records.filter((record) => {
@@ -127,8 +135,6 @@ const LoggedInContainer = ({ info, children, }) => {
 
   const songUrl = currentSong ? currentSong.audio : "";
   const audioRef = useRef(new Audio()); // ////Create an audio element using useRef
-
-
 
 
 
@@ -174,6 +180,7 @@ const LoggedInContainer = ({ info, children, }) => {
     //   pauseSound();
 
     // }
+    waveSurferRef.current.load( currentSong.audio );
   }, [currentSong]);
 
    useEffect(() => {
@@ -236,11 +243,6 @@ const LoggedInContainer = ({ info, children, }) => {
       }
   }, [isPaused, song])
 
-  console.log(info)
-  var s = info[0];
- 
- console.log(s)
-
   const playNextSong = () => {
     if (!currentSong || !currentSong.audio) {
       console.log("Error: Missing current song");
@@ -257,50 +259,77 @@ const LoggedInContainer = ({ info, children, }) => {
       return;
     }
 
-      console.log( info )
-    const currentIndex = info.findIndex(
-      (song) => song.audio === currentSong.audio
-    );
+      // console.log( info )
 
-    
-    if (currentIndex === -1) {
-      console.log("Error: Current song not found in records");
-      return;
+    // if (nextIndex === -1) {
+    //   console.log("Error: Current song not found in records");
+    //   return;
+    // }
+
+    let nextIndex = info.findIndex( song => song.id === currentSong.id );
+
+    // if( currentSong.sound ) {
+    //   currentSong.sound.pause(); // Pause the current sound
+    // }
+
+    nextIndex++;
+
+    if( nextIndex < info.length )  {
+      waveforms[song].pause();
+      waveforms[info[nextIndex].id].play();
+      // console.log( waveforms[info[nextIndex].id] );
+       setCurrentSong({
+         ...info[nextIndex],
+         sound: null, // Clear the sound
+       });
+
+      setSong( info[nextIndex].id );
     }
-
-    const nextIndex = (currentIndex + 1) % info.length; // Circular next
-    const nextSong = info[nextIndex];
-
-    if (currentSong.sound) {
-      currentSong.sound.pause(); // Pause the current sound
-    }
-
-    setCurrentSong({
-      ...nextSong,
-      sound: null, // Clear the sound
-    });
-  };
+   };
 
   const playPreviousSong = () => {
     if (!currentSong || !currentSong.audio || !info || !info) {
       return; // No current song to play previous from
     }
 
-    const currentIndex = info.findIndex(
-      (song) => song.audio === currentSong.audio
-    );
-    const previousIndex = (currentIndex - 1 + info.length) % info.length; // Circular previous
-    const previousSong = info[previousIndex];
+      let prevIndex = info.findIndex( song => song.id === currentSong.id );
 
-    if (currentSong.sound) {
-      currentSong.sound.pause(); // Pause the current sound
-    }
+      prevIndex--;
 
-    setCurrentSong({
-      ...previousSong,
-      sound: null, // Clear the sound
-    });
+      if( prevIndex <= info.length && prevIndex >= 0 )  {
+         waveforms[song].pause();
+         waveforms[info[prevIndex].id].play();
+         setCurrentSong({
+            ...info[prevIndex],
+            sound: null, // Clear the sound
+         });
+
+         setSong( info[prevIndex].id );
+      }
   };
+
+
+   function toggleSong( currentIndex )  {
+      let nextIndex = info.findIndex( song => song.id === currentSong.id );
+      const nextSong = info[nextIndex];
+
+      if( currentSong.sound ) {
+         currentSong.sound.pause(); // Pause the current sound
+      }
+
+      nextIndex++;
+
+      if( nextIndex <= info.length )  {
+         waveforms[song].pause();
+         waveforms[info[nextIndex].id].play();
+         setCurrentSong({
+            ...info[nextIndex],
+            sound: null, // Clear the sound
+         });
+
+         setSong( info[nextIndex].id );
+      }
+  }
 
 
 
@@ -424,25 +453,30 @@ const LoggedInContainer = ({ info, children, }) => {
             <div className="hidden md:flex items-center mb-8 mx-10">
               <Icon icon="subway:sound" color="white" />
               <input
-  type="range"
-  min="0"
-  max="100"
-  step="1"
-  value={volume}
-  onChange={(e) => {
-    const newVolume = parseInt(e.target.value);
-    setVolume(newVolume);
+                 type="range"
+                 min="0"
+                 max="100"
+                 step="1"
+                 value={currentVolume * 100}
+                 onChange={(e) => {
+                   // const newVolume = parseInt(e.target.value);
+                   // setVolume(newVolume);
+                  const volume = e.currentTarget.value / 100;
+                  // console.log( volume );
 
-    // //Update the volume for WaveSurfer
-    if (waveSurferRef.current) {
-      waveSurferRef.current.setVolume(newVolume / 100);
-    }
+                  clearTimeout( volumeDebounce );
 
-  }}
-  className="w-24"
-/>
+                  volumeDebounce = setTimeout(() => {
+                     setCurrentVolume( volume );
+                  }, 100);
 
-
+                   // //Update the volume for WaveSurfer
+                   // if (waveSurferRef.current) {
+                     // waveSurferRef.current.setVolume( newVolume / 100 );
+                   // }
+               }}
+              className="w-24"
+            />
             </div>
           </div>
         )}
