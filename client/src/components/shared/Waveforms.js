@@ -12,13 +12,12 @@ export default function Waveforms({filteredinfo, audioUrl,  id, waveforms, setWa
 const waveformContainerRef = useRef(null);
 const  {isWaveformPlaying,setIsWaveformPlaying} = useWaveformContext();
 const {isPaused, setIsPaused} = useContext(songContext)
- const {currentTimestamp, setCurrentTimestamp, currentSong} = useContext(songContext);
+const {currentTimestamp, setCurrentTimestamp, currentSong, currentVolume} = useContext(songContext);
 
 const [duration, setDuration] = useState(0);
 const [wave, setWave] = useState(null);
 //  console.log(isWaveformPlaying)
 //  console.log(setIsWaveformPlaying)
-
 
 let ws;
 
@@ -45,7 +44,7 @@ useEffect(() => {
         ws.load(audioUrl);
 
         ws.on("play", () => {
-         console.log("playyy")
+         // console.log("playyy")
           setIsWaveformPlaying(id)
           setIsPaused(false)
         });
@@ -78,7 +77,7 @@ useEffect(() => {
    if(!ws){
     return;
    }
- 
+
    ws.on("audioprocess", () => {
     const newTime = ws.getCurrentTime();
 
@@ -86,21 +85,40 @@ useEffect(() => {
     setCurrentTimestamp(newTime);
   });
 
-  },[song, currentTimestamp])
+  },[song, currentTimestamp]);
 
-  function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = Math.floor(seconds % 60);
-    return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
-  }
-  useEffect(() => {
+   useEffect(() => {
+      const waveform = waveforms[id];
+      if( !waveform || song !== id ) return
+
+      waveform.setVolume( currentVolume );
+   }, [currentVolume]);
+
+   useEffect(() => {
+      const waveform = waveforms[id];
+      if( !waveform || song !== id ) return
+
+      const currentSongPercentage = ( currentTimestamp ) / waveform.getDuration();
+      if( currentSongPercentage > 0 && currentSongPercentage <= 1 ) waveform.seekTo( currentSongPercentage );
+
+      // console.log( waveforms[id] );
+
+   }, [currentTimestamp]);
+
+   function formatTime(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.floor(seconds % 60);
+      return `${minutes}:${remainingSeconds < 10 ? "0" : ""}${remainingSeconds}`;
+   }
+
+   useEffect(() => {
       if( song !== id || !waveforms[id] ) return
       if( isPaused ) {
          waveforms[id].pause()
       } else {
          waveforms[id].play()
       }
-  }, [isPaused, waveformContainerRef])
+   }, [isPaused, waveformContainerRef])
 
   return (
     <>

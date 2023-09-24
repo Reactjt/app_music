@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-  
- 
+
+
 import LoggedInContainer from "../containers/LoggedInContainer";
 import SingleFilterCard from "../components/shared/Filter";
 
@@ -14,7 +14,7 @@ const FilteredSongs = () => {
     const [apiCompleted, setApiCompleted] = useState(false);
 
     const observer = useRef(null); // Ref to the IntersectionObserver instance
-  
+
     const fetchFilteredSongs = async () => {
       try {
         setLoading(true);
@@ -35,13 +35,13 @@ const FilteredSongs = () => {
           setSongsData(prevData => {
             // Merge the previous data with the new fetched data
             const mergedData = { ...prevData };
-           
+
             for (const key in response.data) {
               if (response.data.hasOwnProperty(key)) {
                 mergedData[key] = response.data[key];
               }
             }
-        
+
             return mergedData;
           });
         } else {
@@ -58,14 +58,14 @@ const FilteredSongs = () => {
         setApiCompleted(true);
       }
     };
-    
-     
 
-  
+
+
+
     const handleLoadMore = () => {
       setCurrentPage(prevPage => prevPage + 1);
     };
-  
+
 
     const handleObserver = (entries) => {
       const entry = entries[0];
@@ -79,17 +79,17 @@ const FilteredSongs = () => {
       if (observer.current) {
         observer.current.disconnect();
       }
-  
+
       observer.current = new IntersectionObserver(handleObserver, {
         root: null,
         rootMargin: "0px",
         threshold: 1.0,
       });
-  
+
       if (observer.current) {
         observer.current.observe(document.documentElement);
       }
-  
+
       return () => {
         if (observer.current) {
           observer.current.disconnect();
@@ -100,17 +100,17 @@ const FilteredSongs = () => {
     useEffect(() => {
       fetchFilteredSongs(currentPage);
     }, [currentPage]);
-  
+
 
 // console.log(totalSongs)
 
     return (
         <LoggedInContainer info={totalSongs}  curActiveScreen="myMusic">
-           
+
             {apiCompleted ?  /* Only render if API call is completed */
     (
          <SingleFilterCard info={totalSongs}/>
-        
+
       ) : (
         <p>No songs data available.</p>
       )
@@ -118,13 +118,13 @@ const FilteredSongs = () => {
           <button onClick={handleLoadMore} href="#">
             loadmore
           </button>
-         
+
         </LoggedInContainer>
     );
 };
 
 export default FilteredSongs;
 
- 
 
- 
+
+
