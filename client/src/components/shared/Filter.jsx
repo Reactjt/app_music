@@ -8,17 +8,13 @@ import { play } from "../../assets";
 import {Icon} from "@iconify/react"
  import "./filter.css"
  import WaveSurfer from "wavesurfer.js";
-import Waveforms from "./Waveforms";
-import { useWaveformContext } from "../../contexts/WaveformContext";
 
 
 const SingleFilterCard = ({ info}) => {
-
     const audioRef = React.useRef(null);
 
     const { selectedFilter, setSelectedFilter } = useContext(filteredInfoContext);
-
-    const {isPaused, setIsPaused, currentSong, setCurrentSong, song, setSong} = useContext(songContext);
+    const {isPaused, setIsPaused} = useContext(songContext);
     const [progress, setProgress] = useState(0); // Current progress in seconds
     const [isPlaying, setIsPlaying] = useState(false); // Song playing status
     const [currentTime, setCurrentTime] = useState(0);
@@ -60,82 +56,115 @@ const SingleFilterCard = ({ info}) => {
      : songs;
 //   console.log(filteredinfo)
 
-    const [waveforms, setWaveforms] = useState({});
+    const { currentSong, setCurrentSong } = useContext(songContext);
+
+
+    const [waveforms, setWaveforms] = useState([]);
     const waveformContainerRef = useRef(null);
 
-     const  {isWaveformPlaying,setIsWaveformPlaying} = useWaveformContext();
+    const [isWaveformPlaying, setIsWaveformPlaying] = useState(
+        new Array(filteredinfo.length).fill(false)
+      ); // Track play state for each waveform
 
-    //   console.log(isWaveformPlaying)
-    //   console.log(setIsWaveformPlaying)
+    useEffect(() => {
+        console.error("useEffect runn");
+        // const usedIds = [];
+
+        const initializeWaveform = (audioUrl, id) => {
+          console.log("ID: " + id);
+          if(!waveformContainerRef.current){
+            return;
+          }
+          const element = waveformContainerRef.current;
+          console.log("eleeeeee: "+element)
+
+            const ws = WaveSurfer.create({
+              container: element,
+              responsive: true,
+              barWidth: 2,
+              barHeight: 4,
+              barGap: null,
+              height: 50,
+              progressColor: "rgba(255, 255, 255, 0.7)",
+              waveColor: "rgba(255, 255, 255, 0.4)",
+              cursorWidth: 0,
+            });
+
+            ws.load(audioUrl);
+
+            ws.on("play", () => {
+              setIsWaveformPlaying((prev) =>
+                prev.map((value, index) => (index === id ? true : value))
+              );
+            });
+
+            ws.on("pause", () => {
+              setIsWaveformPlaying((prev) =>
+                prev.map((value, index) => (index === id ? false : value))
+              );
+            });
+
+            setWaveforms((prevWaveforms) => [...prevWaveforms, ws]);
 
 
-//       const playySong = (id) => {
-//         if(!waveforms){
-//             return;
-//         }
-//      console.error(id)
-//        console.log("waveformmms",waveforms)
-//         const waveform = waveforms[id];
-//        console.log("waveform",waveform)
-//    if(!waveform){
-//     return;
-//    }
-//    console.error("waveformmmmmmm")
 
-//         if (waveform) {
+        };
 
-//           if (isWaveformPlaying) {
-//             waveform.pause();
-//             setIsWaveformPlaying(null);
-//           } else {
-//             console.error(waveform)
-//             waveform.play();
-//             setIsWaveformPlaying(id);
-//           }
-//         }
-//       };
+        filteredinfo.forEach((song) => {
+        //    usedIds.push(index);
 
-    const playSong = (audioUrl,id) => {
+          initializeWaveform(song.audio, song.id);
 
+        });
+
+        return () => {
+          waveforms.forEach((ws) => {
+            ws.destroy();
+          });
+        };
+      }, [filteredinfo]);
+
+
+      const playySong = (index) => {
         if(!waveforms){
             return;
         }
-     console.error(id)
-       console.log("waveformmms",waveforms)
-        const waveform = waveforms[id];
-       console.log("waveform",waveform)
+        console.log("nefkjnerkfknkfe"+waveforms)
+        const waveform = waveforms[index];
    if(!waveform){
     return;
    }
-   console.error("waveformmmmmmm")
-
         if (waveform) {
-
-          if (isWaveformPlaying) {
-            waveform.pause();
-            setIsWaveformPlaying(null);
-            // setIsPaused(true)
-            // setIsPlaying(false)
-          } else {
             console.error(waveform)
+          if (isWaveformPlaying[index]) {
+            waveform.pause();
+          } else {
             waveform.play();
-            // setIsPaused(false)
-            setIsWaveformPlaying(id);
-            setSong(id)
-            // setIsPlaying(true);
           }
         }
+      };
 
+    const playSong = (audioUrl,id) => {
 
+        // if (isWaveformPlaying[id]) {
+        //     waveforms[id].pause();
+        //   } else {
+        //     waveforms.forEach((ws, index) => {
+        //       if (index !== id) {
+        //         ws.pause();
+        //       }
+        //     });
+        //     waveforms[id].play();
+        //   }
         // Find the clicked song from the records array
         const clickedSong = filteredinfo.find((song) => song.audio === audioUrl);
 
-        // if (!clickedSong) {
-        //     return; // Return early if the clicked song is not found
-        // }
+        if (!clickedSong) {
+            return; // Return early if the clicked song is not found
+        }
 
         if (currentSong && currentSong.sound && currentSong.audio === audioUrl) {
-            // Pause the audio if _it's the same song that is already playing
+            // Pause the audio if it's the same song that is already playing
             currentSong.sound.pause();
             setCurrentSong((prevCurrentSong) => ({ ...prevCurrentSong, sound: null })); // Clear the sound
         } else {
@@ -147,7 +176,17 @@ const SingleFilterCard = ({ info}) => {
                     console.log("error");
                 }
             }
-          // Create a new Howl instance for the selected song
+
+
+            function updateProgress() {
+                if (sound && isPlaying) {
+                    const newProgress = sound.seek();
+                    setProgress(newProgress);
+                    requestAnimationFrame(updateProgress);
+                }
+            }
+
+            // Create a new Howl instance for the selected song
 
     const sound = new Howl({
         src: [audioUrl],
@@ -155,7 +194,7 @@ const SingleFilterCard = ({ info}) => {
         onplay: () => {
             setIsPlaying(true);
             console.log("filter onplay")
-
+            requestAnimationFrame(updateProgress);
         },
         onpause: () => {
             setIsPlaying(false);
@@ -167,7 +206,7 @@ const SingleFilterCard = ({ info}) => {
 
             }));
             setIsPlaying(false);
-
+            setProgress(0);
         },});
 
 
@@ -191,7 +230,7 @@ const SingleFilterCard = ({ info}) => {
         link.click();
       };
 
-      // console.log(filteredinfo.audio)
+      console.log(filteredinfo.audio)
 
       const handleShare = async () => {
         if (navigator.share) {
@@ -219,7 +258,7 @@ const threshold = 200;
 
     return (
         <div>
-            {filteredinfo.map((item,index) => (
+            {filteredinfo.map((item, index) => (
 
                 <div
                     key={item.id}
@@ -230,9 +269,15 @@ const threshold = 200;
                    >
                     <div className="flex items-center"
                              onClick={() => {
-                        playSong(item.audio,item.id);
+                        playSong(item.audio);
 
                     }}>
+                                <button
+                  onClick={() => playySong(index)}
+                  className="mx-2 sm:mx-4 sm:h-5 sm:w-5 hover:cursor-pointer"
+                >
+                  {isWaveformPlaying[index] ? "Pause" : "Play"}
+                </button>
 
 
                             <img
@@ -242,15 +287,6 @@ const threshold = 200;
                             />
 
                         <div className="mx-6 md:ml-6">
-                        <Icon
-                    icon={
-                      isWaveformPlaying === item.id || ( song === item.id && !isPaused )
-                        ? "solar:pause-bold"
-                        : "solar:play-bold"
-                    }
-                    className="cursor-pointer w-6 h-6 text-white"
-
-                  />
                          </div>
                         <div>
 
@@ -270,17 +306,13 @@ const threshold = 200;
 
                          </div>
                        </div>
-                      <Waveforms
-                      song = {song}
-                      filteredinfo={filteredinfo}
-                      audioUrl={item.audio}
-                      setIsWaveformPlaying={setIsWaveformPlaying}
-                      id={item.id}
-                      waveforms={waveforms}
-                      setWaveforms={setWaveforms}
-                      />
+                       <div
+                    ref={waveformContainerRef}
+              id={`waveform-${index}`}
+              className="w-1/3 ml-auto "
+            ></div>
 
-          <div className="  flex md:flex  sm:w-1/10  md:p-1 md:ml-10">
+          <div className="flex md:p-4 ml-auto">
                        <Icon
                         icon="ri:download-line"
                         color="white"
